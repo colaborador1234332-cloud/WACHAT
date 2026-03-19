@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>WA API - copia</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:18px;background:#f8fafc;color:#0f172a}
+    .module-title{font-size:1.25rem;margin-bottom:8px}
+    .btn{padding:6px 10px;border-radius:6px;border:1px solid #cbd5e1;background:#0ea5a4;color:white}
+    .btn-secondary{background:#94a3b8;color:white;border:1px solid #cbd5e1}
+    form{max-width:920px}
+    label{display:flex;flex-direction:column}
+    input,select{padding:6px;border-radius:6px;border:1px solid #cbd5e1}
+    pre{background:#f1f5f9;padding:8px;border-radius:6px;border:1px solid #e2e8f0}
+  </style>
+</head>
+<body>
+  <h2 class="module-title">API WhatsApp (copia)</h2>
+  <p style="font-size:.85rem;color:#475569;margin:0 0 12px;">Enviar texto o plantilla vía <code>/send-whatsapp</code> (backend requerido).</p>
+
+  <!-- Sección simple API WhatsApp -->
+  <section>
+    <form id="waSendForm" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;flex-wrap:wrap;gap:14px;">
+        <label style="flex:1;min-width:180px;">
+          Destino (E.164)
+          <input id="waTo" type="text" placeholder="+521234567890">
+        </label>
+        <label style="flex:1;min-width:180px;">
+          Modo
+          <select id="waMode">
+            <option value="text">Texto simple</option>
+            <option value="template">Template</option>
+          </select>
+        </label>
+        <label id="waTemplateNameWrap" style="flex:1;min-width:160px;display:none;">
+          Nombre template
+          <input id="waTemplateName" type="text" placeholder="hello_world">
+        </label>
+        <label id="waTemplateLangWrap" style="flex:1;min-width:140px;display:none;">
+          Idioma
+          <input id="waTemplateLang" type="text" value="en_US">
+        </label>
+      </div>
+      <label id="waMessageWrap">Mensaje
+        <input id="waMessage" type="text" placeholder="Texto">
+      </label>
+      <label id="waTemplateParamsWrap" style="display:none;">Parámetros BODY (separados por |)
+        <input id="waTemplateParams" type="text" placeholder="Ej: Juan|12345">
+      </label>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button type="submit" class="btn">Enviar</button>
+        <button type="button" id="waExampleBtn" class="btn btn-secondary">Ejemplo</button>
+        <button type="button" id="waDryRunBtn" class="btn btn-secondary">Dry run</button>
+        <span id="waStatus" style="font-size:.85rem;color:#64748b;">—</span>
+      </div>
+      <pre id="waResult" style="display:none;max-height:260px;overflow:auto;font-size:.85rem;"></pre>
+    </form>
+
+    <hr style="margin:18px 0;border:none;border-top:1px solid #e2e8f0;">
+
+    <h3 style="margin:0 0 10px;font-size:1rem;">Plantilla: confirmacion (Spanish)</h3>
+    <form id="waConfirmForm" style="display:flex;flex-direction:column;gap:12px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
+        <label>Destino (E.164)
+          <input id="wacTo" type="text" placeholder="Ej: +529514138990 o 9514138990">
+        </label>
+        <label>Header imagen (opcional URL pública)
+          <input id="wacHeaderUrl" type="text" placeholder="https://.../imagen.jpg">
+        </label>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+        <label>{{1}} Nombre
+          <input id="wacNombre" type="text" placeholder="MIGUEL">
+        </label>
+        <label>{{2}} Trabajo/Producto
+          <input id="wacTrabajo" type="text" placeholder="TARJETA DE PRESENTACION">
+        </label>
+        <label>{{3}} Correcciones gratis
+          <input id="wacCorrecciones" type="number" min="0" step="1" placeholder="2">
+        </label>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button type="submit" class="btn">Enviar plantilla</button>
+        <button type="button" id="wacDryRunBtn" class="btn btn-secondary">Dry run</button>
+        <span id="wacStatus" style="font-size:.85rem;color:#64748b;">—</span>
+      </div>
+      <pre id="wacResult" style="display:none;max-height:260px;overflow:auto;font-size:.85rem;"></pre>
+    </form>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>

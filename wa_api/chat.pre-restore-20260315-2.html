@@ -1,0 +1,1871 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>WA Chat - copia</title>
+  <link rel="icon" href="data:,">
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{width:100%;height:100%;margin:0;overflow:hidden}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#e9edef;color:#0f172a;font-size:17px;line-height:1.35}
+    .wa-page{height:100dvh;max-height:100dvh;display:flex;padding:12px;gap:12px;overflow:hidden}
+    .wa-rail{width:82px;flex:0 0 82px;background:#0f172a;border-radius:12px;padding:12px 9px;display:flex;flex-direction:column;gap:10px;align-items:center;transition:width .2s ease,flex-basis .2s ease}
+    .wa-rail.expanded{width:220px;flex-basis:220px;align-items:stretch}
+    .wa-rail-title{font-size:.62rem;color:#cbd5e1;letter-spacing:.08em;text-transform:uppercase}
+    .wa-rail-toggle{width:100%;height:42px;border:1px solid #334155;border-radius:9px;background:#1e293b;color:#cbd5e1;cursor:pointer}
+    .wa-rail-btn{width:100%;height:48px;border:1px solid #1e293b;border-radius:10px;background:#111827;color:#e2e8f0;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0 10px;gap:10px}
+    .wa-rail-btn.active{background:#14b8a6;color:#042f2e;border-color:#14b8a6}
+    .wa-rail-btn svg{width:20px;height:20px;display:block;flex:0 0 auto}
+    .wa-rail-label{display:none;font-size:.72rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;text-align:left}
+    .wa-rail.expanded .wa-rail-label{display:block}
+    .wa-profile-box{margin-top:auto;width:100%;padding-top:6px;border-top:1px solid #1e293b;display:flex;justify-content:center}
+    .wa-profile-pic{width:36px;height:36px;border-radius:50%;border:2px solid #14b8a6;object-fit:cover}
+    .wa-rail.expanded .wa-profile-box{justify-content:flex-start;gap:8px;align-items:center}
+    .wa-profile-name{display:none;color:#e2e8f0;font-size:.72rem;font-weight:700}
+    .wa-rail.expanded .wa-profile-name{display:block}
+    .wa-app{flex:1 1 auto;min-width:0;min-height:0;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+    .wa-topbar{display:flex;align-items:center;gap:10px;padding:8px 10px;flex:0 0 auto;flex-wrap:wrap}
+    .wa-brand{font-size:1.1rem;font-weight:800;letter-spacing:.08em;color:#0f172a}
+    .wa-top-actions{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:260px;max-width:640px;width:100%;justify-content:flex-end;flex-wrap:wrap}
+    .wa-top-search{min-width:260px;max-width:360px;width:100%;height:40px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;padding:0 12px;color:#334155;display:flex;align-items:center;justify-content:flex-start;cursor:pointer}
+    .wa-top-search:focus-visible{outline:2px solid #14b8a6;outline-offset:2px}
+    .wa-top-search-input{height:40px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;padding:0 12px;min-width:260px;max-width:360px;width:100%;font-size:.88rem}
+    .wa-top-filter-btn{height:40px;border:1px solid #0f766e;border-radius:10px;background:#14b8a6;color:#fff;padding:0 13px;font-size:.84rem;font-weight:700;cursor:pointer;white-space:nowrap}
+    .wa-top-add-btn{height:40px;border:1px solid #1d4ed8;border-radius:10px;background:#2563eb;color:#fff;padding:0 13px;font-size:.84rem;font-weight:700;cursor:pointer;white-space:nowrap}
+    .wa-funnels-top-controls{position:relative;display:none;align-items:center;gap:8px;justify-content:flex-end;width:100%}
+    .wa-funnels-top-controls.active{display:flex}
+    .wa-add-popover{position:absolute;top:42px;right:96px;z-index:30;width:min(330px,92vw);background:#fff;border:1px solid #dbe4ea;border-radius:10px;box-shadow:0 10px 28px rgba(2,6,23,.16);padding:10px;display:none;flex-direction:column;gap:8px}
+    .wa-add-popover.open{display:flex}
+    .wa-add-popover-title{margin:0;font-size:.84rem;color:#0f172a}
+    .wa-add-popover-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:8px}
+    .wa-add-popover-field{display:flex;flex-direction:column;gap:4px}
+    .wa-add-popover-field label{font-size:.72rem;color:#475569;font-weight:700}
+    .wa-add-popover-input,.wa-add-popover-select{height:32px;border:1px solid #cbd5e1;border-radius:8px;padding:0 8px;font-size:.78rem;background:#fff}
+    .wa-add-popover-actions{display:flex;justify-content:flex-end;gap:8px}
+    .wa-add-popover-cancel{height:30px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;cursor:pointer;font-size:.75rem}
+    .wa-add-popover-save{height:30px;padding:0 12px;border:1px solid #1d4ed8;border-radius:8px;background:#2563eb;color:#fff;cursor:pointer;font-size:.75rem;font-weight:700}
+    .module-title{font-size:1.05rem;line-height:1.1;margin:0;padding:0 8px 4px;flex:0 0 auto;color:#475569}
+    .dash-wrap{display:flex;flex-direction:column;gap:10px;width:100%;height:100%}
+    .dash-hello{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px}
+    .dash-hello h3{margin:0 0 6px;font-size:1.15rem}
+    .dash-hello p{margin:0;color:#64748b;font-size:.86rem}
+    .dash-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:10px;min-height:0;flex:1}
+    .dash-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:0}
+    .dash-card h3{margin:0;font-size:1rem}
+    .dash-sub{margin:0;color:#64748b;font-size:.8rem}
+    .dash-kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:4px}
+    .dash-kpi-box{border:1px solid #e2e8f0;border-radius:10px;padding:10px;background:#f8fafc}
+    .dash-kpi-label{font-size:.72rem;color:#475569}
+    .dash-kpi-value{font-size:1.25rem;font-weight:800;color:#0f172a;line-height:1.1}
+    .dash-kpi-value.alert{color:#b91c1c}
+    .team-list{display:flex;flex-direction:column;gap:7px;min-height:0;overflow:auto}
+    .team-row{display:flex;justify-content:space-between;gap:8px;border:1px solid #e2e8f0;border-radius:8px;padding:8px;background:#f8fafc;font-size:.78rem}
+    .team-state{font-weight:700}
+    .team-state.on{color:#166534}
+    .team-state.off{color:#991b1b}
+    .lead-popup-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.5);display:none;align-items:center;justify-content:center;z-index:9998}
+    .lead-popup-backdrop.open{display:flex}
+    .wa-history-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center;z-index:9999}
+    .wa-history-backdrop.open{display:flex}
+    .wa-history-modal{width:min(760px,94vw);max-height:min(78vh,760px);background:#fff;border:1px solid #dbe4ea;border-radius:12px;display:flex;flex-direction:column;overflow:hidden}
+    .wa-history-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
+    .wa-history-title{margin:0;font-size:.94rem;color:#0f172a}
+    .wa-history-close{height:32px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
+    .wa-history-list{padding:10px;display:flex;flex-direction:column;gap:7px;overflow:auto}
+    .wa-history-item{border:1px solid #e2e8f0;border-radius:9px;background:#fff;padding:8px 9px;display:flex;flex-direction:column;gap:4px}
+    .wa-history-user{font-size:.82rem;color:#0f172a;font-weight:700;line-height:1.2}
+    .wa-history-main{font-size:.8rem;color:#334155;line-height:1.25}
+    .wa-history-meta{font-size:.72rem;color:#64748b;margin-top:2px}
+    .wa-history-empty{color:#64748b;font-size:.8rem;padding:6px}
+    .wa-msg-delete-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center;z-index:10008}
+    .wa-msg-delete-backdrop.open{display:flex}
+    .wa-msg-delete-modal{width:min(430px,92vw);background:#fff;border:1px solid #dbe4ea;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:9px}
+    .wa-msg-delete-title{margin:0;font-size:.92rem;color:#0f172a}
+    .wa-msg-delete-text{font-size:.78rem;color:#475569;line-height:1.25}
+    .wa-msg-delete-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+    .wa-msg-delete-cancel{height:34px;padding:0 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;cursor:pointer}
+    .wa-msg-delete-me{height:34px;padding:0 12px;border:1px solid #f59e0b;border-radius:9px;background:#fef3c7;color:#92400e;cursor:pointer;font-weight:700}
+    .wa-msg-delete-all{height:34px;padding:0 12px;border:1px solid #ef4444;border-radius:9px;background:#fee2e2;color:#991b1b;cursor:pointer;font-weight:700}
+    .wa-funnel-chat-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center;z-index:10005}
+    .wa-funnel-chat-backdrop.open{display:flex}
+    .wa-funnel-chat-modal{width:min(760px,94vw);height:min(78vh,760px);background:#fff;border:1px solid #dbe4ea;border-radius:12px;display:flex;flex-direction:column;overflow:hidden}
+    .wa-funnel-chat-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
+    .wa-funnel-chat-head-main{display:flex;align-items:center;gap:8px;min-width:0}
+    .wa-funnel-chat-avatar{width:34px;height:34px;border-radius:9px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;color:#334155;flex:0 0 auto}
+    .wa-funnel-chat-title{margin:0;font-size:.9rem;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-funnel-chat-sub{font-size:.74rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-funnel-chat-close{height:32px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
+    .wa-funnel-chat-conv{flex:1 1 auto;min-height:0;padding:10px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;background:linear-gradient(#ffffff,#f7fbfa);overflow:auto}
+    .wa-funnel-chat-composer{padding:8px;border-top:1px solid #e6eef0;background:#fff;display:flex;gap:8px;align-items:center}
+    .wa-funnel-chat-input{flex:1;height:40px;border:1px solid #cbd5e1;border-radius:10px;padding:0 10px;font-size:.84rem}
+    .wa-chat-overlay-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;z-index:10030}
+    .wa-chat-overlay-backdrop.open{display:block}
+    .wa-panel.wa-chat-overlay-open{display:flex !important;position:fixed;top:58px;right:14px;bottom:14px;left:14px;z-index:10040;background:#fff;border:1px solid #dbe4ea;border-radius:12px;box-shadow:0 18px 34px rgba(2,6,23,.24)}
+    .wa-chat-overlay-close{position:fixed;top:14px;right:14px;height:34px;padding:0 11px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;cursor:pointer;z-index:10050;font-size:.78rem;font-weight:700;color:#0f172a;display:none}
+    .wa-chat-overlay-close.open{display:inline-flex;align-items:center;justify-content:center}
+    .wa-media-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.52);display:none;align-items:center;justify-content:center;z-index:10025}
+    .wa-media-backdrop.open{display:flex}
+    .wa-media-modal{width:min(1200px,96vw);height:min(84vh,860px);background:#fff;border:1px solid #dbe4ea;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 22px 40px rgba(2,6,23,.26)}
+    .wa-media-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
+    .wa-media-title{margin:0;font-size:1rem;color:#0f172a}
+    .wa-media-sub{margin:2px 0 0;font-size:.78rem;color:#64748b}
+    .wa-media-close{height:34px;padding:0 10px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;cursor:pointer}
+    .wa-media-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid #e2e8f0;background:#fff;flex-wrap:wrap}
+    .wa-media-tabs{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    .wa-media-tab{height:34px;padding:0 12px;border:1px solid #cbd5e1;border-radius:999px;background:#fff;color:#334155;font-size:.74rem;font-weight:800;cursor:pointer}
+    .wa-media-tab.active{background:#0f766e;border-color:#0f766e;color:#fff}
+    .wa-media-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .wa-media-icon-btn{height:34px;min-width:34px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0 9px;font-size:.82rem;font-weight:700}
+    .wa-media-icon-btn.active{background:#dbeafe;color:#1e3a8a;border-color:#60a5fa}
+    .wa-media-icon-btn svg{width:16px;height:16px;display:block}
+    .wa-media-search{display:none;height:34px;min-width:220px;border:1px solid #cbd5e1;border-radius:9px;padding:0 9px;font-size:.8rem}
+    .wa-media-search.open{display:block}
+    .wa-media-filters{display:none;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid #e2e8f0;background:#f8fafc;flex-wrap:wrap}
+    .wa-media-filters.open{display:flex}
+    .wa-media-filter-select{height:32px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;padding:0 9px;font-size:.76rem}
+    .wa-media-content{flex:1 1 auto;min-height:0;overflow:auto;padding:10px 14px 66px;background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%)}
+    .wa-media-empty{border:1px dashed #cbd5e1;border-radius:10px;padding:18px;text-align:center;color:#64748b;font-size:.8rem;background:#fff}
+    .wa-media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+    .wa-media-month-section{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+    .wa-media-grid.wa-media-grid-5{grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:#fff}
+    .wa-media-card{position:relative;border:none;border-radius:0;background:#0f172a;padding:0;display:flex;flex-direction:column;gap:0;min-height:0;aspect-ratio:1/1;overflow:hidden}
+    .wa-media-thumb{position:relative;width:100%;height:100%;border-radius:0;background:#0f172a;display:flex;align-items:center;justify-content:center;font-size:.72rem;color:#e2e8f0;overflow:hidden}
+    .wa-media-thumb img,.wa-media-thumb video{width:100%;height:100%;object-fit:cover}
+    .wa-media-thumb-overlay{position:absolute;left:0;right:0;bottom:0;padding:18px 8px 6px;background:linear-gradient(180deg,rgba(2,6,23,0) 0%,rgba(2,6,23,.72) 100%);pointer-events:none}
+    .wa-media-thumb-label{font-size:.74rem;font-weight:700;color:#fff;line-height:1.2;text-shadow:0 1px 2px rgba(0,0,0,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-media-meta{font-size:.7rem;color:#64748b;line-height:1.2}
+    .wa-media-check{position:absolute;top:7px;left:7px;display:none}
+    .wa-media-modal.selecting .wa-media-check{display:block}
+    .wa-media-month{margin:8px 0 6px;font-size:.78rem;font-weight:800;color:#0f172a}
+    @media (max-width: 1260px){
+      .wa-media-grid.wa-media-grid-5{grid-template-columns:repeat(4,minmax(0,1fr))}
+    }
+    @media (max-width: 980px){
+      .wa-media-grid.wa-media-grid-5{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
+    @media (max-width: 740px){
+      .wa-media-grid.wa-media-grid-5{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media (max-width: 470px){
+      .wa-media-grid.wa-media-grid-5{grid-template-columns:1fr}
+    }
+    .wa-media-table-wrap{border:1px solid #dbe4ea;border-radius:10px;background:#fff;overflow:auto;-ms-overflow-style:none;scrollbar-width:none}
+    .wa-media-table-wrap::-webkit-scrollbar{width:0;height:0;display:none}
+    .wa-media-table{width:100%;border-collapse:collapse;font-size:.75rem}
+    .wa-media-table th,.wa-media-table td{border-bottom:1px solid #edf2f7;padding:8px 6px;text-align:left;vertical-align:top}
+    .wa-media-table th{position:sticky;top:0;background:#f8fafc;z-index:1;font-size:.71rem;color:#334155}
+    .wa-media-row-actions{position:relative;display:inline-flex}
+    .wa-media-row-menu{position:fixed;top:0;left:0;min-width:170px;background:#fff;border:1px solid #dbe4ea;border-radius:9px;padding:6px;box-shadow:0 12px 24px rgba(2,6,23,.18);display:none;z-index:3000}
+    .wa-media-row-menu.open{display:flex;flex-direction:column;gap:4px}
+    .wa-media-row-menu.open-up{transform-origin:bottom right}
+    .wa-media-row-menu button{height:30px;border:1px solid transparent;border-radius:7px;background:#fff;text-align:left;padding:0 8px;font-size:.73rem;cursor:pointer}
+    .wa-media-row-menu button:hover{background:#f1f5f9;border-color:#dbe4ea}
+    .wa-media-batch-left,.wa-media-batch-right{position:absolute;bottom:12px;display:none;align-items:center;gap:8px;z-index:8}
+    .wa-media-batch-left{left:14px}
+    .wa-media-batch-right{right:14px}
+    .wa-media-modal.selecting .wa-media-batch-left,.wa-media-modal.selecting .wa-media-batch-right{display:flex}
+    .wa-media-danger{height:36px;min-width:36px;border:1px solid #ef4444;border-radius:10px;background:#fee2e2;color:#991b1b;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+    .wa-media-danger svg{width:18px;height:18px}
+    .wa-media-batch-btn{height:36px;min-width:36px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#334155;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0 10px;font-size:.74rem;font-weight:700}
+    .lead-popup{width:min(1080px,95vw);height:min(78vh,760px);background:#fff;border:1px solid #dbe4ea;border-radius:12px;display:grid;grid-template-columns:2fr 1fr;overflow:hidden}
+    .lead-popup-left{display:flex;flex-direction:column;min-width:0;min-height:0;border-right:1px solid #e2e8f0}
+    .lead-popup-right{display:flex;flex-direction:column;gap:8px;padding:12px;min-width:0;min-height:0;background:#f8fafc}
+    .lead-popup-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #e2e8f0}
+    .lead-popup-title{margin:0;font-size:.98rem}
+    .lead-popup-search{flex:1;height:34px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px}
+    .lead-popup-close{height:34px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;padding:0 10px;cursor:pointer}
+    .lead-popup-table-wrap{flex:1;min-height:0;overflow:auto}
+    .lead-popup-table{width:100%;border-collapse:collapse;font-size:.76rem}
+    .lead-popup-table th,.lead-popup-table td{border-bottom:1px solid #edf2f7;padding:8px 6px;text-align:left;white-space:nowrap}
+    .lead-popup-table th{position:sticky;top:0;background:#f8fafc;z-index:1}
+    .lead-user{display:flex;align-items:center;gap:8px;min-width:180px}
+    .lead-avatar{width:28px;height:28px;border-radius:999px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#334155}
+    .lead-filter-title{margin:0;font-size:.86rem}
+    .lead-filter-group{display:flex;flex-direction:column;gap:6px}
+    .lead-filter-label{font-size:.74rem;color:#334155;font-weight:700}
+    .lead-radio-list{display:flex;flex-direction:column;gap:6px}
+    .lead-radio-item{display:flex;align-items:center;gap:8px;font-size:.8rem;color:#334155}
+    .lead-filter-select,.lead-filter-date{height:34px;border:1px solid #cbd5e1;border-radius:8px;padding:0 8px;background:#fff}
+    .wa-panel{display:none;flex:1 1 auto;min-height:0;overflow:hidden}
+    .wa-panel.active{display:flex;overflow:auto;padding-bottom:0;overscroll-behavior:contain}
+    .wa-shell{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:20% 1fr 23%;gap:10px;overflow:auto;align-content:start;padding-bottom:0;overscroll-behavior:contain}
+    #waPanelChats.wa-panel.active{overflow:hidden;padding-bottom:0}
+    #waPanelChats .wa-shell{height:100%;overflow:hidden;padding-bottom:0;align-content:stretch;grid-template-columns:minmax(240px,1fr) minmax(0,2.15fr) minmax(240px,1fr);gap:8px !important}
+    #waPanelChats .wa-sidebar,#waPanelChats .wa-main,#waPanelChats .wa-rightbar{margin:0 !important}
+    @media (min-width: 1500px){
+      #waPanelChats .wa-shell{grid-template-columns:minmax(260px,1fr) minmax(0,2.55fr) minmax(260px,1fr);gap:10px !important}
+    }
+    .wa-sidebar,.wa-main,.wa-rightbar{min-width:0;min-height:0;overflow:hidden}
+    .wa-card{height:100%;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:11px 11px 0;display:flex;flex-direction:column;min-height:0;overflow:hidden;box-shadow:0 8px 22px rgba(15,23,42,.06)}
+    .wa-search-wrap{margin-bottom:6px;flex:0 0 auto}
+    .wa-search{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:9px;font-size:.86rem}
+    .wa-history-btn{height:29px;padding:0 9px;border:1px solid #1d4ed8;border-radius:8px;background:#2563eb;color:#fff;font-size:.7rem;font-weight:700;cursor:pointer}
+    .wa-quick-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-bottom:7px;width:100%}
+    .wa-quick-filter-btn{height:26px;padding:0 4px;border:1px solid #cbd5e1;border-radius:999px;background:#fff;color:#334155;font-size:.58rem;font-weight:700;cursor:pointer;transition:all .15s ease;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+    .wa-quick-filter-btn.active{background:#dbeafe;border-color:#60a5fa;color:#1e3a8a;box-shadow:0 0 0 1px rgba(59,130,246,.15) inset}
+    .wa-contacts{flex:1 1 auto;min-height:0;overflow:auto}
+    .wa-mass-panel{margin-top:8px;padding:8px;border:1px solid #dbe4ea;border-radius:10px;background:#f8fafc;display:flex;flex-direction:column;gap:7px}
+    .wa-mass-panel.module{margin-top:0;padding:12px;gap:8px;border-radius:14px;background:#fff;box-shadow:0 12px 24px rgba(15,23,42,.08)}
+    .wa-mass-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .wa-mass-title{margin:0;font-size:.75rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.03em}
+    .wa-mass-panel.module .wa-mass-title{font-size:.9rem}
+    .wa-mass-note{font-size:.68rem;color:#64748b;line-height:1.35}
+    .wa-mass-panel.module .wa-mass-note{font-size:.78rem}
+    .wa-mass-grid{display:grid;grid-template-columns:1fr;gap:6px}
+    .wa-mass-panel.module .wa-mass-grid{gap:7px}
+    .wa-mass-label{font-size:.7rem;font-weight:700;color:#334155;letter-spacing:.02em}
+    .wa-mass-panel.module .wa-mass-label{font-size:.78rem}
+    .wa-mass-section-title{margin:2px 0 0;font-size:.76rem;font-weight:800;color:#0f172a;letter-spacing:.04em;text-transform:uppercase}
+    .wa-mass-panel.module .wa-mass-section-title{font-size:.82rem}
+    .wa-mass-help{margin-top:-2px;font-size:.67rem;color:#64748b}
+    .wa-mass-panel.module .wa-mass-help{font-size:.74rem}
+    .wa-mass-select,.wa-mass-time{height:30px;border:1px solid #cbd5e1;border-radius:8px;padding:0 8px;background:#fff;font-size:.73rem;color:#0f172a}
+    .wa-mass-panel.module .wa-mass-select,.wa-mass-panel.module .wa-mass-time{height:36px;font-size:.8rem}
+    .wa-mass-select[multiple]{height:auto;min-height:96px;padding:6px 8px}
+    .wa-mass-days-input{width:100%;height:36px;border:1px solid #cbd5e1;border-radius:8px;padding:0 10px;background:#fff;font-size:.8rem;color:#0f172a}
+    .wa-mass-panel.module .wa-mass-select[multiple]{height:auto;min-height:120px;padding:8px}
+    .wa-mass-days-row{display:grid;grid-template-columns:38px minmax(0,1fr) 38px;gap:6px;align-items:center}
+    .wa-mass-step-btn{height:36px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#0f172a;font-size:1rem;font-weight:800;cursor:pointer}
+    .wa-mass-step-btn:active{transform:translateY(1px)}
+    .wa-mass-tag-picker{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center}
+    .wa-mass-tag-input{height:36px;border:1px solid #cbd5e1;border-radius:8px;padding:0 10px;background:#fff;font-size:.8rem;color:#0f172a}
+    .wa-mass-tag-add{height:36px;padding:0 10px;border:1px solid #0f766e;border-radius:8px;background:#0f766e;color:#fff;font-size:.76rem;font-weight:700;cursor:pointer}
+    .wa-mass-tags{display:flex;flex-wrap:wrap;gap:6px;min-height:22px}
+    .wa-mass-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#e2e8f0;color:#0f172a;font-size:.72rem;font-weight:700}
+    .wa-mass-tag-remove{border:none;background:transparent;color:#334155;font-size:.8rem;line-height:1;cursor:pointer;padding:0}
+    .wa-mass-template-block{border:1px solid #dbe4ea;border-radius:10px;background:#f8fafc;padding:8px;display:grid;grid-template-columns:1fr;gap:6px}
+    .wa-mass-template-title{margin:0;font-size:.75rem;font-weight:800;color:#0f172a;letter-spacing:.03em;text-transform:uppercase}
+    .wa-mass-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .wa-mass-btn{height:30px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;font-size:.7rem;font-weight:800;cursor:pointer}
+    .wa-mass-panel.module .wa-mass-btn{height:34px;font-size:.76rem}
+    .wa-mass-btn.primary{background:#0f766e;border-color:#0f766e;color:#fff}
+    .wa-mass-btn.warn{background:#b45309;border-color:#b45309;color:#fff}
+    .wa-mass-status{font-size:.69rem;color:#334155;border:1px dashed #cbd5e1;border-radius:8px;background:#fff;padding:6px;max-height:88px;overflow:auto;line-height:1.35}
+    .wa-mass-module-wrap{display:flex;justify-content:center;padding:18px}
+    .wa-mass-module-inner{width:min(1320px,100%)}
+    .wa-mass-module-head{margin-bottom:12px}
+    .wa-mass-module-title{margin:0;font-size:1.08rem;color:#0f172a}
+    .wa-mass-module-sub{margin:6px 0 0;color:#64748b;font-size:.85rem;line-height:1.45}
+    .wa-mass-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:start}
+    .wa-mass-split-left{min-width:0}
+    .wa-mass-split-right{min-width:0;position:sticky;top:8px;display:flex;flex-direction:column;gap:8px}
+    .wa-mass-conditions{display:grid;grid-template-columns:1fr;gap:6px}
+    .wa-mass-conditions .wa-mass-help{margin-top:0}
+    .wa-mass-preview-title{margin:0;font-size:.86rem;color:#0f172a;font-weight:800;letter-spacing:.03em;text-transform:uppercase}
+    .wa-mass-preview-sub{margin:0;font-size:.74rem;color:#64748b;line-height:1.35}
+    .wa-mass-preview-card{border:1px solid #dbe4ea;border-radius:10px;background:#fff;padding:9px 10px;display:flex;flex-direction:column;gap:5px}
+    .wa-mass-preview-label{font-size:.7rem;color:#64748b;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+    .wa-mass-preview-value{font-size:.8rem;color:#0f172a;line-height:1.35;word-break:break-word;white-space:pre-wrap}
+    .wa-mass-preview-list{display:flex;flex-direction:column;gap:6px}
+    .wa-mass-preview-item{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;padding:7px 8px}
+    .wa-mass-preview-item-text{font-size:.77rem;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+    .wa-mass-preview-item-btn{height:28px;padding:0 10px;border:1px solid #0f766e;border-radius:8px;background:#0f766e;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;flex:0 0 auto}
+    .wa-mass-preview-empty{font-size:.75rem;color:#64748b}
+    .wa-mass-chat-preview-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center;z-index:10018}
+    .wa-mass-chat-preview-backdrop.open{display:flex}
+    .wa-mass-chat-preview-modal{width:min(560px,94vw);max-height:min(82vh,760px);background:#fff;border:1px solid #dbe4ea;border-radius:12px;display:flex;flex-direction:column;overflow:hidden}
+    .wa-mass-chat-preview-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
+    .wa-mass-chat-preview-title{margin:0;font-size:.9rem;color:#0f172a}
+    .wa-mass-chat-preview-close{height:30px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
+    .wa-mass-chat-preview-body{padding:12px;display:flex;flex-direction:column;gap:8px;background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);overflow:auto}
+    .wa-mass-chat-bubble{max-width:88%;align-self:flex-end;background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+    .wa-mass-chat-bubble-template{max-width:88%;align-self:flex-end;background:#dbeafe;border:1px solid #93c5fd;border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+    .wa-mass-chat-bubble-label{font-size:.68rem;color:#475569;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+    .wa-mass-chat-bubble-text{font-size:.8rem;color:#0f172a;line-height:1.35;white-space:pre-wrap;word-break:break-word}
+    .wa-mass-chat-bubble-image{width:100%;max-height:220px;object-fit:cover;border-radius:8px;border:1px solid #cbd5e1;background:#fff}
+    @media (max-width: 1024px){
+      .wa-mass-split{grid-template-columns:1fr}
+      .wa-mass-split-right{position:static}
+    }
+    .wa-contact-row{display:flex;gap:8px;align-items:center;padding:8px 6px;border-radius:10px;border:1px solid transparent;background:transparent;width:100%;text-align:left;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+    .wa-contact-row:hover{background:#f8fafc;border-color:#e2e8f0;transform:translateY(-1px)}
+    .wa-contact-row > div{min-width:0}
+    .wa-avatar{width:44px;height:44px;border-radius:11px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:700;flex:0 0 auto}
+    .wa-contact-avatar{width:34px;height:34px;border-radius:9px;font-size:.76rem}
+    .wa-contact-main{flex:1;min-width:0}
+    .wa-contact-head{display:flex;align-items:center;gap:6px;min-width:0}
+    .wa-contact-title{font-weight:700;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+    .wa-contact-time{font-size:.72rem;color:#64748b;flex:0 0 auto;white-space:nowrap}
+    .wa-unread-count{min-width:20px;height:20px;border-radius:999px;background:#dc2626;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;padding:0 5px;line-height:1;flex:0 0 auto}
+    .wa-contact-preview{font-size:.74rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-msg-checks{display:inline-block;margin-right:4px;color:#64748b;font-weight:700;letter-spacing:-1px}
+    .wa-msg-checks.read{color:#0ea5e9}
+    .wa-header{display:flex;align-items:center;gap:8px;padding:8px 6px;border-bottom:1px solid #e6eef0;flex:0 0 auto;min-height:60px}
+    .wa-header .title{font-weight:700;font-size:.96rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-header .subtitle{font-size:.82rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .unread-badge{background:#25D366;color:#fff;padding:3px 6px;border-radius:12px;font-size:.68rem}
+    .wa-crmbar{display:flex;align-items:center;gap:6px;padding:7px 0 8px;flex:0 0 auto;min-width:0;overflow:visible;flex-wrap:wrap;row-gap:6px}
+    .wa-select{height:34px;min-width:126px;max-width:188px;padding:0 9px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font-size:.78rem;color:#0f172a}
+    .wa-select.small{min-width:110px;max-width:150px}
+    .wa-icon-btn{height:34px;min-width:34px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;color:#334155;cursor:pointer;padding:0 8px}
+    .wa-icon-btn.active{background:#e0f2fe;border-color:#7dd3fc;color:#0c4a6e}
+    .wa-icon-btn svg{width:16px;height:16px}
+    .wa-icon-btn.success{background:#dcfce7;color:#166534;border-color:#86efac}
+    .wa-icon-btn.danger{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+    .wa-settings-shell{--st-accent:#0f766e;--st-accent-soft:#ccfbf1;--st-ink:#0f172a;--st-muted:#475569;display:flex;flex-direction:column;gap:10px;width:100%;height:100%;min-height:0;background:radial-gradient(circle at 12% 14%,#e6fffa 0%,transparent 36%),radial-gradient(circle at 90% 0%,#e0ecff 0%,transparent 30%),#f4f7fb;border:1px solid #dbe4ea;border-radius:12px;padding:10px}
+    .wa-settings-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;background:linear-gradient(135deg,#0f172a 0%,#0f766e 100%);border-radius:11px;padding:12px 14px;color:#f8fafc}
+    .wa-settings-title{margin:0;font-size:1rem;letter-spacing:.01em}
+    .wa-settings-sub{margin:3px 0 0;font-size:.76rem;opacity:.9}
+    .wa-settings-badge{padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.16);font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+    .wa-settings-tabs{display:flex;gap:7px;flex-wrap:wrap}
+    .wa-settings-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px;border:1px solid #dbe4ea;border-radius:10px;background:#fff}
+    .wa-settings-tools-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0;flex:1}
+    .wa-settings-tools-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .wa-settings-search{height:34px;min-width:260px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;background:#fff;font-size:.8rem;flex:1}
+    .wa-settings-tool-btn{height:30px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;padding:0 10px;font-size:.73rem;font-weight:700;cursor:pointer}
+    .wa-settings-tool-hint{font-size:.72rem;color:#64748b}
+    .wa-settings-tab{height:34px;padding:0 12px;border:1px solid #bfd5dd;border-radius:9px;background:#ffffff;color:#334155;font-size:.74rem;font-weight:800;cursor:pointer;letter-spacing:.02em}
+    .wa-settings-tab.active{background:var(--st-accent);color:#fff;border-color:var(--st-accent);box-shadow:0 7px 16px rgba(15,118,110,.2)}
+    .wa-settings-pane{display:none;min-height:0;flex:1 1 auto}
+    .wa-settings-pane.active{display:block}
+    .wa-settings-pane-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:8px}
+    .wa-settings-pane-message{font-size:.72rem;color:#64748b;text-align:right;margin-bottom:8px}
+    .wa-settings-wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;height:100%}
+    .wa-settings-stack{display:grid;grid-template-columns:1fr;gap:10px;width:100%}
+    .wa-settings-card{background:#fff;border:1px solid #dbe4ea;border-radius:11px;padding:12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 6px 14px rgba(2,6,23,.05);position:relative}
+    .wa-settings-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:6px;border-bottom:1px solid #edf2f7}
+    .wa-settings-card-head-title{min-width:0;display:flex;flex-direction:column;gap:1px}
+    .wa-settings-card-head-label{font-size:.8rem;font-weight:800;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-settings-card-head-kicker{font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:.03em}
+    .wa-settings-card-toggle{height:28px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;padding:0 8px;font-size:.72rem;font-weight:700;cursor:pointer;flex:0 0 auto}
+    .wa-settings-card-body{display:flex;flex-direction:column;gap:8px}
+    .wa-settings-card.collapsed .wa-settings-card-body{display:none}
+    .wa-settings-card h3{margin:0;font-size:.95rem;color:var(--st-ink)}
+    .wa-settings-kicker{font-size:.66rem;font-weight:800;color:#0f766e;text-transform:uppercase;letter-spacing:.08em}
+    .wa-settings-label{font-size:.74rem;color:var(--st-muted);font-weight:700}
+    .wa-settings-text{width:100%;min-height:106px;resize:vertical;border:1px solid #cdd9e1;border-radius:9px;padding:9px;font-size:.78rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#f8fafc}
+    .wa-settings-text:focus-visible,.wa-users-input:focus-visible{outline:2px solid #7dd3fc;outline-offset:1px}
+    .wa-settings-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .wa-settings-note{font-size:.72rem;color:#64748b;line-height:1.35}
+    .wa-settings-inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .wa-settings-inline input[type="checkbox"]{width:16px;height:16px}
+    .wa-users-table-wrap{border:1px solid #dbe4ea;border-radius:10px;background:#fff;overflow:auto;max-height:320px}
+    .wa-users-table{width:100%;border-collapse:collapse;font-size:.76rem}
+    .wa-users-table th,.wa-users-table td{border-bottom:1px solid #edf2f7;padding:8px 6px;text-align:left;white-space:nowrap}
+    .wa-users-table th{position:sticky;top:0;background:#f0f7ff;z-index:1;color:#1e293b;font-size:.71rem;letter-spacing:.04em;text-transform:uppercase}
+    .wa-users-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .wa-users-input{height:36px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font-size:.8rem;min-width:210px;background:#fff}
+    .wa-settings-chip-row{display:flex;gap:8px;flex-wrap:wrap}
+    .wa-settings-chip{display:inline-flex;align-items:center;padding:4px 9px;border:1px solid #cfe5e1;border-radius:999px;background:var(--st-accent-soft);color:#115e59;font-size:.68rem;font-weight:700}
+    .wa-settings-list-editor{display:flex;flex-direction:column;gap:8px}
+    .wa-settings-list-add{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .wa-settings-list-input{height:36px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font-size:.8rem;min-width:220px;background:#fff;flex:1 1 auto}
+    .wa-qr-composer{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid #dbe4ea;border-radius:10px;background:#f8fafc}
+    .wa-qr-composer-grid{display:grid;grid-template-columns:170px 200px minmax(220px,1fr) auto;gap:8px;align-items:center}
+    .wa-qr-composer-text{width:100%;min-height:72px;max-height:150px;border:1px solid #cbd5e1;border-radius:10px;padding:8px 10px;font-size:.82rem;resize:vertical;background:#fff;line-height:1.35}
+    .wa-qr-composer-help{font-size:.7rem;color:#64748b;line-height:1.35}
+    .wa-qr-presets{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .wa-qr-preset-btn{height:28px;padding:0 9px;border:1px solid #cbd5e1;border-radius:999px;background:#fff;color:#334155;font-size:.72rem;font-weight:700;cursor:pointer}
+    .wa-qr-preset-btn:hover{background:#f1f5f9}
+    .wa-qr-tabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:4px;border:1px solid #dbe4ea;border-radius:10px;background:#fff}
+    .wa-qr-tab-btn{height:30px;padding:0 12px;border:1px solid #cbd5e1;border-radius:999px;background:#fff;color:#334155;font-size:.73rem;font-weight:700;cursor:pointer}
+    .wa-qr-tab-btn.active{background:#0f766e;color:#fff;border-color:#0f766e;box-shadow:0 5px 12px rgba(15,118,110,.22)}
+    .wa-qr-tab-pane{display:none;flex-direction:column;gap:8px}
+    .wa-qr-tab-pane.active{display:flex}
+    .wa-qr-tab-pane .wa-settings-list-wrap{max-height:320px}
+    .wa-qr-rules-wrap{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid #dbe4ea;border-radius:10px;background:#fff}
+    .wa-settings-list-wrap{display:flex;flex-direction:column;gap:6px;border:1px solid #dbe4ea;border-radius:9px;padding:8px;background:#f8fafc;min-height:82px;max-height:220px;overflow:auto}
+    .wa-settings-list-row{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #e2e8f0;background:#fff;border-radius:8px;padding:6px 8px}
+    .wa-settings-list-row input[type="checkbox"]{width:16px;height:16px;cursor:pointer}
+    .wa-settings-list-name{font-size:.78rem;color:#0f172a;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-settings-list-remove{height:28px;padding:0 9px;border:1px solid #ef4444;border-radius:999px;background:#fee2e2;color:#991b1b;font-size:.7rem;font-weight:700;cursor:pointer}
+    .wa-settings-list-empty{font-size:.74rem;color:#64748b;padding:6px 2px}
+    .wa-profile-editor{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+    .wa-profile-preview-pic{width:58px;height:58px;border-radius:50%;border:2px solid #14b8a6;object-fit:cover;background:#e2e8f0}
+    .wa-profile-fields{display:flex;flex-direction:column;gap:8px}
+    .wa-profile-input{height:36px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;font-size:.8rem;background:#fff}
+    .wa-profile-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .wa-profile-help{font-size:.7rem;color:#64748b;line-height:1.35}
+    .wa-qr-row{display:grid;grid-template-columns:100px 120px 1fr 1fr 120px auto;gap:8px;align-items:center}
+    .wa-qr-cell{font-size:.74rem;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-qr-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:700;color:#0f766e}
+    .wa-qr-id{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#475569}
+    .wa-qr-section{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;border:1px solid #99f6e4;background:#ccfbf1;color:#115e59;font-size:.66rem;font-weight:800;letter-spacing:.02em;text-transform:uppercase}
+    .wa-qr-keywords{font-size:.68rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-qr-auto-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .wa-qr-auto-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .wa-qr-auto-table-wrap{border:1px solid #dbe4ea;border-radius:10px;background:#fff;overflow:auto;max-height:300px}
+    .wa-qr-auto-table{width:100%;border-collapse:collapse;font-size:.75rem}
+    .wa-qr-auto-table th,.wa-qr-auto-table td{border-bottom:1px solid #edf2f7;padding:7px 6px;text-align:left;vertical-align:middle;white-space:nowrap}
+    .wa-qr-auto-table th{position:sticky;top:0;background:#f0f7ff;z-index:1;color:#1e293b;font-size:.7rem;letter-spacing:.04em;text-transform:uppercase}
+    .wa-qr-auto-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:700;color:#0f766e}
+    .wa-qr-auto-select{height:30px;border:1px solid #cbd5e1;border-radius:8px;padding:0 8px;background:#fff;font-size:.74rem;min-width:170px}
+    .wa-qr-auto-check{width:16px;height:16px;cursor:pointer}
+    .wa-qr-auto-text{max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#334155}
+    .wa-catalog-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .wa-catalog-select{height:36px;border:1px solid #cbd5e1;border-radius:9px;padding:0 10px;background:#fff;font-size:.8rem;min-width:180px}
+    .wa-catalog-table-wrap{border:1px solid #dbe4ea;border-radius:10px;background:#fff;overflow:auto;max-height:320px}
+    .wa-catalog-table{width:100%;border-collapse:collapse;font-size:.76rem}
+    .wa-catalog-table th,.wa-catalog-table td{border-bottom:1px solid #edf2f7;padding:8px 6px;text-align:left;white-space:nowrap}
+    .wa-catalog-table th{position:sticky;top:0;background:#f0f7ff;z-index:1;color:#1e293b;font-size:.71rem;letter-spacing:.04em;text-transform:uppercase}
+    .wa-catalog-empty{font-size:.76rem;color:#64748b;padding:10px}
+    .wa-catalog-modal{width:min(460px,94vw);background:#fff;border:1px solid #dbe4ea;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+    .wa-auth-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.5);display:none;align-items:center;justify-content:center;z-index:10010}
+    .wa-auth-backdrop.open{display:flex}
+    .wa-auth-modal{width:min(420px,92vw);background:#fff;border:1px solid #dbe4ea;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+    .wa-auth-title{margin:0;font-size:1rem}
+    .wa-auth-input{height:36px;border:1px solid #cbd5e1;border-radius:8px;padding:0 10px;font-size:.84rem}
+    .wa-auth-select{height:36px;border:1px solid #cbd5e1;border-radius:8px;padding:0 10px;font-size:.84rem;background:#fff;color:#0f172a}
+    .wa-auth-textarea{min-height:96px;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px;font-size:.84rem;resize:vertical;font-family:inherit}
+    .wa-auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .wa-auth-check{display:flex;align-items:center;gap:7px;font-size:.76rem;color:#334155}
+    .wa-auth-error{font-size:.76rem;color:#b91c1c;min-height:18px}
+    .wa-auth-status{font-size:.72rem;color:#475569}
+    .wa-perms-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center;z-index:10020}
+    .wa-perms-backdrop.open{display:flex}
+    .wa-perms-modal{width:min(520px,94vw);background:#fff;border:1px solid #dbe4ea;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+    .wa-perms-title{margin:0;font-size:.95rem}
+    .wa-perms-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .wa-perms-item{display:flex;align-items:center;gap:8px;border:1px solid #e2e8f0;border-radius:8px;padding:8px;background:#f8fafc;font-size:.78rem}
+    .dir-wrap{display:flex;flex-direction:column;gap:8px;width:100%;height:100%;min-height:0}
+    .dir-tabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .dir-tab{height:32px;padding:0 12px;border:1px solid #cbd5e1;border-radius:999px;background:#fff;color:#334155;font-size:.75rem;font-weight:700;cursor:pointer}
+    .dir-tab.active{background:#0f766e;color:#fff;border-color:#0f766e}
+    .dir-toolbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .dir-icon{height:34px;min-width:34px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .dir-icon svg{width:18px;height:18px}
+    .dir-selected{font-size:.78rem;color:#475569;padding:0 8px;border-left:1px solid #cbd5e1;margin-left:6px}
+    .dir-big-btn{height:34px;padding:0 14px;border-radius:9px;border:1px solid #0f766e;background:#14b8a6;color:#fff;font-weight:700;cursor:pointer}
+    .dir-big-btn.secondary{background:#0f766e}
+    .dir-table-wrap{flex:1 1 auto;min-height:0;overflow:auto;border:1px solid #e2e8f0;border-radius:10px;background:#fff}
+    .dir-table{width:100%;border-collapse:collapse;font-size:.75rem}
+    .dir-table th,.dir-table td{border-bottom:1px solid #edf2f7;padding:8px 6px;text-align:left;vertical-align:top}
+    .dir-table th{position:sticky;top:0;background:#f8fafc;font-size:.72rem;color:#334155;z-index:1}
+    .dir-badge{display:inline-block;padding:2px 7px;border-radius:999px;font-size:.66rem;font-weight:700}
+    .dir-badge.active{background:#dcfce7;color:#166534}
+    .dir-badge.archived{background:#fee2e2;color:#991b1b}
+    .dir-sub{font-size:.68rem;color:#64748b;display:block}
+    .dir-modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center;z-index:9999}
+    .dir-modal-backdrop.open{display:flex}
+    .dir-modal{width:min(480px,92vw);background:#fff;border-radius:12px;border:1px solid #dbe4ea;padding:14px;display:flex;flex-direction:column;gap:10px}
+    .dir-modal h3{margin:0;font-size:1rem}
+    .dir-modal-row{display:flex;flex-direction:column;gap:5px}
+    .dir-modal-row label{font-size:.75rem;color:#475569}
+    .dir-modal-row select,.dir-modal-row textarea{border:1px solid #cbd5e1;border-radius:8px;padding:8px;font-size:.82rem}
+    .dir-modal-actions{display:flex;justify-content:flex-end;gap:8px}
+    .wa-pill-btn{padding:7px 8px;border-radius:14px;border:1px solid #cbd5e1;background:#0ea5a4;color:#fff;font-size:.75rem;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;touch-action:manipulation}
+    .wa-conversation{flex:1 1 auto;min-height:0;padding:10px 10px 10px;display:flex;flex-direction:column;justify-content:flex-start;gap:8px;background:linear-gradient(#ffffff,#f7fbfa);overflow:auto;overflow-anchor:none;overscroll-behavior:contain;-ms-overflow-style:none;scrollbar-width:none;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+    .wa-conversation::-webkit-scrollbar{width:0;height:0;display:none}
+    .wa-conversation-empty{margin-top:auto;align-self:stretch;min-height:42px;display:flex;align-items:center;justify-content:center;border:none;border-radius:0;background:transparent;color:#94a3b8;font-size:.78rem}
+    .wa-conversation-logo-slot{margin:auto;min-height:220px;width:min(460px,92%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+    .wa-conversation-logo{max-width:min(280px,84%);max-height:150px;object-fit:contain;display:block}
+    #waPanelChats.wa-no-chat-selected .wa-rightbar{display:none !important}
+    #waPanelChats.wa-no-chat-selected .wa-shell{grid-template-columns:minmax(240px,1fr) minmax(0,2.9fr) !important}
+    #waPanelChats.wa-no-chat-selected .wa-header,
+    #waPanelChats.wa-no-chat-selected .wa-crmbar,
+    #waPanelChats.wa-no-chat-selected .wa-reply-preview,
+    #waPanelChats.wa-no-chat-selected .wa-composer-wrap{display:none !important}
+    #waPanelChats.wa-no-chat-selected .wa-main .wa-card{grid-template-rows:minmax(0,1fr) !important;padding:0 !important}
+    #waPanelChats.wa-no-chat-selected .wa-conversation{grid-row:1 !important;background:#fff !important;padding:12px 14px !important}
+    .msg-bubble{max-width:86%;padding:8px 12px;border-radius:14px;line-height:1.25;display:inline-block;word-break:break-word;white-space:pre-wrap;font-size:.88rem;box-shadow:0 3px 10px rgba(15,23,42,.06);transition:box-shadow .2s ease,transform .2s ease,background .2s ease}
+    .msg-in{background:#fff;border:1px solid #e6eef0;border-top-left-radius:4px}
+    .msg-out{background:linear-gradient(180deg,#dcfce7 0%,#d1fae5 100%);align-self:flex-end;border-top-right-radius:4px}
+    .msg-row.out .msg-bubble,.msg-row.in .msg-bubble{position:relative}
+    .msg-row.out .msg-bubble{padding-right:30px}
+    .msg-row.in .msg-bubble{padding-left:30px}
+    .msg-actions-toggle{position:absolute;top:4px;right:6px;width:18px;height:18px;border:1px solid #86efac;border-radius:999px;background:#bbf7d0;color:#166534;font-size:.66rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+    .msg-actions-menu{position:absolute;top:24px;right:0;min-width:190px;display:none;flex-direction:column;gap:2px;background:rgba(255,255,255,.96);border:1px solid #dbe4ea;border-radius:9px;box-shadow:0 14px 30px rgba(2,6,23,.22);backdrop-filter:blur(5px);padding:6px;z-index:2200}
+    .msg-actions-menu.open{display:flex}
+    .msg-actions-menu.open-up{top:auto;bottom:24px}
+    .msg-row.in .msg-actions-toggle{left:6px;right:auto}
+    .msg-row.in .msg-actions-menu{left:0;right:auto}
+    .msg-action-item{height:32px;border:1px solid transparent;border-radius:7px;background:#fff;color:#0f172a;text-align:left;padding:0 9px;font-size:.76rem;cursor:pointer}
+    .msg-action-item:hover{background:#f1f5f9;border-color:#dbe4ea}
+    .msg-action-item.danger{color:#b91c1c}
+    .msg-reply-quote{display:flex;flex-direction:column;gap:2px;border-left:3px solid #22c55e;background:rgba(255,255,255,.6);border-radius:8px;padding:6px 8px;margin-bottom:6px}
+    .msg-reply-header{font-size:.67rem;font-weight:800;color:#166534;line-height:1.1}
+    .msg-reply-sender{font-size:.68rem;font-weight:800;color:#166534;line-height:1.1}
+    .msg-reply-text{font-size:.75rem;color:#334155;line-height:1.2;word-break:break-word}
+    .wa-reply-preview{display:none;align-items:flex-start;gap:8px;padding:8px 10px;border-top:1px solid #e6eef0;background:#f8fffb;opacity:0;transform:translateY(16px);transition:opacity .2s ease,transform .22s ease;will-change:transform,opacity}
+    .wa-reply-preview.show{display:flex;opacity:1;transform:translateY(0)}
+    .wa-reply-preview-main{flex:1;min-width:0;border-left:3px solid #14b8a6;background:#ffffff;border-radius:8px;padding:6px 8px}
+    .wa-reply-preview-sender{font-size:.7rem;font-weight:800;color:#0f766e;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-reply-preview-text{font-size:.77rem;color:#334155;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+    .wa-reply-preview-close{width:26px;height:26px;border:1px solid #cbd5e1;border-radius:999px;background:#fff;color:#334155;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:0 0 auto}
+    .msg-bubble.msg-starred{box-shadow:0 0 0 1px rgba(148,163,184,.45) inset,0 0 0 2px rgba(203,213,225,.35)}
+    .msg-bubble.msg-starred-animate{animation:waStarGlow .55s ease both}
+    .msg-meta-star{color:#94a3b8;font-size:.78rem;font-weight:800;letter-spacing:.01em;vertical-align:baseline;display:inline-block}
+    .msg-row{position:relative;z-index:1}
+    .msg-row.msg-menu-open{z-index:2400}
+    .msg-row.msg-focus-only .msg-bubble{box-shadow:0 0 0 2px rgba(14,116,144,.35),0 8px 20px rgba(2,6,23,.16)}
+    .wa-conversation-focus-banner{position:sticky;top:0;z-index:12;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;margin-bottom:8px;border:1px solid #bae6fd;border-radius:8px;background:#ecfeff}
+    .wa-conversation-focus-text{font-size:.74rem;color:#0f172a;font-weight:700}
+    .wa-conversation-focus-clear{height:26px;padding:0 9px;border:1px solid #7dd3fc;border-radius:7px;background:#fff;color:#075985;font-size:.72rem;font-weight:700;cursor:pointer}
+    .wa-conversation-focus-clear:hover{background:#f0f9ff}
+    @keyframes waStarGlow{0%{box-shadow:0 0 0 1px rgba(148,163,184,.6) inset,0 0 0 0 rgba(203,213,225,.55)}100%{box-shadow:0 0 0 1px rgba(148,163,184,.45) inset,0 0 0 2px rgba(203,213,225,.35)}}
+    .msg-text{display:inline;white-space:pre-wrap;word-break:break-word}
+    .msg-meta{display:inline-flex;align-items:flex-end;gap:4px;font-size:.68rem;color:#64748b;margin-left:6px;line-height:1;vertical-align:bottom;position:relative;top:2px;white-space:nowrap}
+    .msg-row{display:flex;flex-direction:column}
+    .msg-row.out{align-items:flex-end}
+    .msg-row.in{align-items:flex-start}
+    .wa-composer-wrap{padding:10px 0 0;border-top:1px solid #e6eef0;background:#fff;flex:0 0 auto;margin-bottom:0}
+    .wa-quickreply-smart{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:0 2px 8px}
+    .wa-quickreply-smart-label{font-size:.7rem;color:#475569;font-weight:700}
+    .wa-quickreply-smart-btn{height:28px;padding:0 9px;border:1px solid #cbd5e1;border-radius:999px;background:#f8fafc;color:#0f172a;font-size:.7rem;font-weight:700;cursor:pointer;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .wa-quickreply-smart-btn strong{color:#0f766e}
+    #waPanelChats .wa-main{overflow:hidden;display:flex;min-height:0;height:100%;width:100%}
+    #waPanelChats .wa-main .wa-card{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto auto;gap:0;align-content:stretch;height:100%;min-height:0;width:100%}
+    #waPanelChats .wa-header{grid-row:1}
+    #waPanelChats .wa-crmbar{grid-row:2}
+    #waPanelChats .wa-conversation{grid-row:3;min-height:0}
+    #waPanelChats .wa-reply-preview{grid-row:4}
+    #waPanelChats .wa-composer-wrap{grid-row:5}
+    .wa-textarea{flex:1;padding:10px 12px;border-radius:16px;border:1px solid #e6eef0;height:42px;resize:none;overflow:hidden;font-size:.88rem}
+    .wa-send-wrap{display:flex;gap:8px;align-items:center;position:relative}
+    .wa-msg-tool-btn{height:40px;min-width:40px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#334155;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.05rem;padding:0 8px;touch-action:manipulation}
+    .wa-msg-action-btn{height:36px;min-width:36px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#334155;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;touch-action:manipulation}
+    .wa-msg-action-btn svg{width:18px;height:18px;display:block}
+    .wa-composer-more-menu{position:absolute;bottom:48px;left:44px;display:none;flex-direction:column;gap:4px;min-width:220px;background:#fff;border:1px solid #dbe4ea;border-radius:10px;box-shadow:0 12px 24px rgba(2,6,23,.18);padding:7px;z-index:35}
+    .wa-composer-more-menu.open{display:flex}
+    .wa-composer-more-item{height:34px;border:1px solid transparent;border-radius:7px;background:#fff;color:#0f172a;text-align:left;padding:0 10px;font-size:.8rem;cursor:pointer}
+    .wa-composer-more-item:hover{background:#f1f5f9;border-color:#dbe4ea}
+    .wa-right-card{height:100%;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:9px;display:flex;flex-direction:column;gap:7px;overflow:hidden;box-shadow:0 8px 22px rgba(15,23,42,.05)}
+    .wa-right-title{margin:0;font-size:.86rem;color:#0f172a}
+    .wa-right-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+    .wa-right-tab{height:30px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;font-size:.72rem;font-weight:800;cursor:pointer}
+    .wa-right-tab.active{background:#0f766e;border-color:#0f766e;color:#fff}
+    .wa-right-pane{display:none;flex:1 1 auto;min-height:0;overflow:auto;border:1px solid #e2e8f0;border-radius:8px;background:#fff}
+    .wa-right-pane.active{display:block}
+    .wa-right-tools{display:flex;justify-content:flex-end;align-items:center}
+    .wa-acc{border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;overflow:hidden;margin-bottom:2px}
+    .wa-acc summary{list-style:none;cursor:pointer;padding:8px 10px;font-size:.76rem;font-weight:700;color:#334155;display:flex;align-items:center;justify-content:space-between}
+    .wa-acc summary::-webkit-details-marker{display:none}
+    .wa-acc-content{padding:8px;display:flex;flex-direction:column;gap:5px;background:#fff;border-top:1px solid #e2e8f0;overflow:visible}
+    .wa-attr-label{font-size:.68rem;color:#64748b;font-weight:700}
+    .wa-attr-input{height:28px;border:1px solid #cbd5e1;border-radius:7px;padding:0 8px;font-size:.75rem}
+    .wa-attr-input[readonly]{background:#f1f5f9;color:#475569}
+    .wa-tags-editor{display:flex;flex-direction:column;gap:5px;align-items:stretch;min-height:36px;padding:6px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;margin-bottom:2px;width:100%}
+    .wa-tags-chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center;max-width:100%;max-height:64px;overflow:auto;padding-bottom:1px}
+    .wa-tag-chip{display:inline-flex;align-items:center;gap:5px;background:#dcfce7;border:1px solid #86efac;color:#166534;padding:2px 6px;border-radius:999px;font-size:.66rem;font-weight:700;line-height:1.15;max-width:100%}
+    .wa-tag-remove{width:16px;height:16px;border:1px solid #4ade80;border-radius:999px;background:#bbf7d0;color:#166534;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:.66rem;line-height:1;padding:0}
+    .wa-tag-remove:disabled{opacity:.45;cursor:not-allowed}
+    .wa-tag-input{width:100%;border:1px dashed #cbd5e1;outline:none;background:#f8fafc;height:28px;font-size:.74rem;padding:0 8px;border-radius:7px}
+    .wa-msg-subsection{display:flex;flex-direction:column;gap:6px}
+    .wa-msg-subsection + .wa-msg-subsection{padding-top:8px;border-top:1px dashed #dbe4ea}
+    .wa-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+    .wa-list-item{border:1px solid #e2e8f0;border-radius:7px;padding:7px;background:#fff;font-size:.75rem;color:#334155;line-height:1.2}
+    .wa-pin-item{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;position:relative}
+    .wa-pin-text{flex:1 1 auto;min-width:0;word-break:break-word}
+    .wa-pin-actions{display:inline-flex;align-items:center;gap:4px;position:relative;flex:0 0 auto}
+    .wa-pin-menu-toggle{height:24px;min-width:24px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#475569;cursor:pointer;font-size:.72rem;line-height:1;padding:0 6px}
+    .wa-pin-menu-toggle:hover{background:#f1f5f9;border-color:#94a3b8}
+    .wa-pin-menu{position:absolute;top:28px;right:0;min-width:190px;background:#fff;border:1px solid #dbe4ea;border-radius:9px;padding:6px;box-shadow:0 12px 24px rgba(2,6,23,.18);display:none;z-index:60}
+    .wa-pin-menu.open{display:flex;flex-direction:column;gap:4px}
+    .wa-pin-menu-item{height:30px;border:1px solid transparent;border-radius:7px;background:#fff;text-align:left;padding:0 8px;font-size:.73rem;cursor:pointer;color:#0f172a}
+    .wa-pin-menu-item:hover{background:#f1f5f9;border-color:#dbe4ea}
+    .wa-list-empty{font-size:.74rem;color:#64748b;padding:4px 2px}
+    .wa-simple-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;height:100%}
+    .wa-simple-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
+    .wa-simple-card h3{margin:0;font-size:1rem}
+    .wa-simple-card p{margin:0;color:#64748b;font-size:.85rem}
+    .wa-events-grid{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:10px;width:100%;height:100%;min-height:0}
+    .wa-events-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:0}
+    .wa-events-card h3{margin:0;font-size:1rem;color:#0f172a}
+    .wa-events-kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .wa-events-kpi-item{border:1px solid #e2e8f0;border-radius:9px;background:#f8fafc;padding:8px;display:flex;flex-direction:column;gap:3px}
+    .wa-events-kpi-label{font-size:.7rem;color:#475569;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .wa-events-kpi-value{font-size:1.2rem;color:#0f172a;font-weight:800;line-height:1}
+    .wa-events-form{display:flex;flex-direction:column;gap:7px}
+    .wa-events-input,.wa-events-select,.wa-events-textarea{width:100%;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#0f172a;padding:0 9px;font-size:.78rem}
+    .wa-events-input,.wa-events-select{height:34px}
+    .wa-events-textarea{height:84px;padding-top:8px;padding-bottom:8px;resize:vertical}
+    .wa-events-row{display:grid;grid-template-columns:1fr 130px;gap:7px}
+    .wa-events-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .wa-events-primary-btn{height:34px;border:1px solid #0f766e;border-radius:8px;background:#0f766e;color:#fff;padding:0 11px;font-size:.76rem;font-weight:800;cursor:pointer}
+    .wa-events-primary-btn:disabled{opacity:.55;cursor:not-allowed}
+    .wa-events-ghost-btn{height:30px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;padding:0 10px;font-size:.74rem;font-weight:700;cursor:pointer}
+    .wa-events-ghost-btn:disabled{opacity:.5;cursor:not-allowed}
+    .wa-events-help{font-size:.72rem;color:#64748b}
+    .wa-events-message{font-size:.74rem;color:#0f766e;min-height:16px}
+    .wa-events-steps{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;color:#334155;font-size:.76rem;line-height:1.35}
+    .wa-events-steps li strong{color:#0f172a}
+    .wa-events-focus{border:1px dashed #99f6e4;border-radius:9px;background:#f0fdfa;padding:8px;display:flex;flex-direction:column;gap:6px}
+    .wa-events-focus-title{font-size:.72rem;font-weight:800;color:#0f766e;text-transform:uppercase;letter-spacing:.04em}
+    .wa-events-search-wrap{position:relative}
+    .wa-events-search-results{position:absolute;left:0;right:0;top:38px;z-index:70;background:#fff;border:1px solid #cbd5e1;border-radius:9px;box-shadow:0 12px 24px rgba(2,6,23,.16);max-height:240px;overflow:auto;display:none}
+    .wa-events-search-results.open{display:block}
+    .wa-events-search-item{width:100%;height:34px;border:none;background:#fff;color:#0f172a;text-align:left;padding:0 10px;font-size:.76rem;cursor:pointer}
+    .wa-events-search-item:hover,.wa-events-search-item.active{background:#f1f5f9}
+    .wa-events-search-empty{padding:10px;font-size:.73rem;color:#64748b}
+    .wa-events-search-help{font-size:.7rem;color:#64748b}
+    .wa-events-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    .wa-events-list{flex:1 1 auto;min-height:0;overflow:auto;border:1px solid #e2e8f0;border-radius:9px;padding:8px;background:#f8fafc;display:flex;flex-direction:column;gap:7px}
+    .wa-event-item{border:1px solid #dbe4ea;border-radius:9px;background:#fff;padding:8px;display:flex;flex-direction:column;gap:6px}
+    .wa-event-head{display:flex;align-items:flex-start;justify-content:space-between;gap:7px}
+    .wa-event-title{font-size:.82rem;font-weight:800;color:#0f172a;line-height:1.2;word-break:break-word}
+    .wa-event-meta{font-size:.73rem;color:#475569;line-height:1.3}
+    .wa-event-notes{font-size:.73rem;color:#334155;line-height:1.35;white-space:pre-wrap;word-break:break-word}
+    .wa-event-status{display:inline-flex;align-items:center;justify-content:center;min-width:74px;height:22px;border-radius:999px;padding:0 8px;font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border:1px solid transparent}
+    .wa-event-status.pending{background:#fef9c3;border-color:#fde68a;color:#854d0e}
+    .wa-event-status.done{background:#dcfce7;border-color:#86efac;color:#166534}
+    .wa-event-status.canceled{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+    .wa-event-source{display:inline-flex;align-items:center;justify-content:center;min-width:84px;height:22px;border-radius:999px;padding:0 8px;font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border:1px solid transparent}
+    .wa-event-source.linked{background:#dbeafe;border-color:#93c5fd;color:#1e3a8a}
+    .wa-event-source.manual{background:#ede9fe;border-color:#c4b5fd;color:#5b21b6}
+    .wa-event-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .wa-event-action-btn{height:28px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#334155;padding:0 9px;font-size:.71rem;font-weight:700;cursor:pointer}
+    .wa-event-action-btn.warn{border-color:#f5c06c;color:#9a680d;background:#fffaf0}
+    .wa-event-action-btn.danger{border-color:#f3b8b8;color:#a11a1a;background:#fff5f5}
+    .wa-events-empty{font-size:.75rem;color:#64748b;text-align:center;padding:18px 8px}
+    .analytics-wrap{display:flex;flex-direction:column;gap:10px;width:100%;height:100%;min-height:0}
+    .analytics-head{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+    .analytics-title{margin:0;font-size:1.1rem}
+    .analytics-range-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .analytics-range-row label{font-size:.76rem;color:#475569;font-weight:700}
+    .analytics-date{height:34px;border:1px solid #cbd5e1;border-radius:8px;padding:0 8px;background:#fff;font-size:.8rem}
+    .analytics-tools-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .analytics-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .analytics-filter{height:34px;min-width:170px;border:1px solid #cbd5e1;border-radius:8px;padding:0 9px;background:#fff;font-size:.78rem;color:#0f172a}
+    .analytics-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .analytics-btn{height:32px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155;padding:0 10px;font-size:.74rem;font-weight:700;cursor:pointer}
+    .analytics-btn.primary{border-color:#0f766e;background:#0f766e;color:#fff}
+    .analytics-meta{font-size:.74rem;color:#64748b}
+    .analytics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .analytics-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:4px}
+    .analytics-card-title{font-size:.74rem;color:#475569;font-weight:700}
+    .analytics-card-value{font-size:1.25rem;font-weight:800;color:#0f172a;line-height:1.1}
+    .analytics-card-sub{font-size:.72rem;color:#64748b}
+    .analytics-card-delta{font-size:.72rem;font-weight:800;color:#16a34a}
+    .analytics-table-wrap{flex:1;min-height:0;overflow:auto;border:1px solid #e2e8f0;border-radius:10px;background:#fff}
+    .analytics-table{width:100%;border-collapse:collapse;font-size:.76rem}
+    .analytics-table th,.analytics-table td{border-bottom:1px solid #edf2f7;padding:8px 6px;text-align:left;white-space:nowrap}
+    .analytics-table th{position:sticky;top:0;background:#f8fafc;z-index:1;font-size:.72rem;color:#334155}
+    .analytics-empty{color:#64748b;font-size:.78rem;padding:10px}
+    .media-list{flex:1 1 auto;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px}
+    .media-row{border:1px solid #dbe4ea;border-radius:10px;padding:8px;background:#fff;display:flex;justify-content:space-between;gap:8px}
+    .media-main{min-width:0}
+    .media-title{font-weight:700;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .media-sub{font-size:.76rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .media-date{font-size:.72rem;color:#334155;flex:0 0 auto}
+    .funnels-wrap{position:relative;display:flex;gap:10px;width:100%;height:100%;min-height:0;overflow:hidden}
+    .funnels-section{display:flex;flex-direction:column;gap:8px;width:100%;height:100%;min-height:0}
+    .funnels-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border:1px solid #dbe4ea;border-radius:10px;background:#fff}
+    .funnels-section-title{margin:0;font-size:.9rem;font-weight:800;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .funnels-section-controls{display:flex;align-items:center;gap:8px;min-width:0}
+    .funnels-board-select{height:32px;min-width:180px;border:1px solid #cbd5e1;border-radius:8px;padding:0 9px;background:#fff;font-size:.76rem;color:#0f172a}
+    .funnels-board-shell{position:relative;flex:1 1 auto;min-width:0;min-height:0;overflow:auto;border:1px solid #dbe4ea;border-radius:10px;background:linear-gradient(180deg,#f8fbfd 0%,#edf5f8 100%);padding:10px}
+    .funnels-alert-arrow{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border:1px solid #ef4444;border-radius:999px;background:#dc2626;color:#fff;display:none;align-items:center;justify-content:center;font-size:1rem;font-weight:900;z-index:18;box-shadow:0 8px 18px rgba(220,38,38,.35);cursor:pointer;animation:funnelsAlertBlink .82s ease-in-out infinite}
+    .funnels-alert-arrow.left{left:8px}
+    .funnels-alert-arrow.right{right:8px}
+    .funnels-alert-arrow.active{display:inline-flex}
+    .funnels-alert-arrow:hover{background:#b91c1c;border-color:#b91c1c}
+    @keyframes funnelsAlertBlink{
+      0%,100%{opacity:1;transform:translateY(-50%) scale(1)}
+      50%{opacity:.32;transform:translateY(-50%) scale(1.08)}
+    }
+    .funnels-priority-queue{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;margin-bottom:10px;border:1px solid #dbe4ea;border-radius:9px;background:#fff}
+    .funnels-priority-label{font-size:.73rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.04em}
+    .funnels-priority-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;border:1px solid #dbe4ea;background:#f8fafc;color:#334155;font-size:.74rem;font-weight:700;cursor:pointer}
+    .funnels-priority-dot{width:8px;height:8px;border-radius:999px;flex:0 0 auto}
+    .funnels-priority-empty{font-size:.72rem;color:#64748b}
+    .funnels-offscreen-wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:4px}
+    .funnels-offscreen-label{font-size:.7rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+    .funnels-offscreen-chip{height:26px;padding:0 9px;border:1px solid #f59e0b;border-radius:999px;background:#fffbeb;color:#92400e;font-size:.7rem;font-weight:800;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+    .funnels-offscreen-chip.critical{border-color:#ef4444;background:#fef2f2;color:#991b1b}
+    .funnels-board{display:flex;gap:10px;align-items:flex-start;min-height:100%}
+    .funnel-col{flex:0 0 320px;max-width:320px;min-height:440px;background:#fff;border:1px solid #dbe4ea;border-radius:10px;display:flex;flex-direction:column;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease}
+    .funnel-col.drag-over{border-color:#14b8a6;box-shadow:0 0 0 2px rgba(20,184,166,.18)}
+    .funnel-col-head{padding:11px;border-bottom:1px solid #e2e8f0;background:#f8fafc;display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .funnel-col-head.drag-handle{cursor:grab}
+    .funnel-col-head.drag-handle:active{cursor:grabbing}
+    .funnel-col-title{font-size:.88rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.04em}
+    .funnel-col-title-input{width:100%;height:32px;border:1px solid #86b6ff;border-radius:8px;padding:0 9px;font-size:.82rem;font-weight:700;color:#0f172a;background:#fff}
+    .funnel-col-title-input:focus{outline:2px solid #93c5fd;outline-offset:1px}
+    .funnel-col-head-right{display:flex;align-items:center;gap:6px}
+    .funnel-col-count{font-size:.76rem;color:#0f766e;background:#ccfbf1;border:1px solid #99f6e4;padding:3px 9px;border-radius:999px}
+    .funnel-col-tools{position:relative}
+    .funnel-col-menu-btn{width:24px;height:24px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#334155;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1}
+    .funnel-col-menu{position:absolute;top:28px;right:0;min-width:210px;background:#fff;border:1px solid #dbe4ea;border-radius:9px;box-shadow:0 10px 22px rgba(2,6,23,.16);padding:6px;display:none;z-index:15}
+    .funnel-col-menu.open{display:flex;flex-direction:column;gap:4px}
+    .funnel-col-menu-item{height:30px;border:1px solid transparent;border-radius:7px;background:#fff;color:#0f172a;text-align:left;padding:0 8px;font-size:.74rem;cursor:pointer}
+    .funnel-col-menu-item:hover{background:#f1f5f9;border-color:#dbe4ea}
+    .funnel-col-floating{position:fixed !important;z-index:9999;pointer-events:none;box-shadow:0 20px 36px rgba(2,6,23,.24);transform:scale(1.01);opacity:.96}
+    .funnel-col-placeholder{border:2px dashed #93c5fd;background:rgba(219,234,254,.45);min-height:420px}
+    .funnel-col-draft{border-style:dashed;border-color:#93c5fd;background:#f8fbff}
+    .funnel-col-body{padding:9px;display:flex;flex-direction:column;gap:9px;min-height:360px;overflow:auto}
+    .funnel-empty{font-size:.75rem;color:#64748b;padding:8px;border:1px dashed #cbd5e1;border-radius:8px;text-align:center}
+    .funnel-card{border:1px solid #dbe4ea;border-radius:9px;background:#fff;padding:10px;display:flex;flex-direction:column;gap:7px;cursor:grab;min-height:76px;justify-content:center}
+    .funnel-card:active{cursor:grabbing}
+    .funnel-priority-line{height:4px;border-radius:999px;margin:-2px 0 2px}
+    .funnel-card-head{display:flex;align-items:center;gap:8px;min-width:0}
+    .funnel-avatar{width:38px;height:38px;border-radius:999px;object-fit:cover;background:#e2e8f0;border:1px solid #cbd5e1;flex:0 0 auto}
+    .funnel-card-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+    .funnel-card-time{font-size:.72rem;color:#64748b;white-space:nowrap;flex:0 0 auto}
+    .funnel-unread-count{min-width:20px;height:20px;border-radius:999px;background:#dc2626;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;padding:0 5px;line-height:1;flex:0 0 auto}
+    .funnel-card-title{font-size:.84rem;font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .funnel-card-sub{font-size:.76rem;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .funnel-card-reason{font-size:.68rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .funnel-priority-badge{display:inline-flex;align-items:center;justify-content:center;padding:1px 6px;border-radius:999px;font-size:.58rem;font-weight:700;color:#fff;line-height:1.1;margin-left:auto}
+    .funnel-card-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:14px}
+    .funnel-badge{display:inline-flex;align-items:center;padding:1px 6px;border-radius:999px;font-size:.58rem;font-weight:700;border:1px solid #dbe4ea;background:#f8fafc;color:#334155;line-height:1.1}
+    .funnel-badge.unread{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+    .funnel-badge.stalled{background:#ffedd5;color:#9a3412;border-color:#fed7aa}
+    .funnels-filters{width:0;flex:0 0 0;opacity:0;pointer-events:none;transition:all .2s ease;overflow:hidden;background:#fff;border:1px solid transparent;border-radius:10px}
+    .funnels-filters.open{width:320px;flex-basis:320px;opacity:1;pointer-events:auto;border-color:#dbe4ea}
+    .funnels-filters-wrap{display:flex;flex-direction:column;gap:10px;padding:12px;height:100%;overflow:auto}
+    .funnels-filter-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .funnels-filter-title{margin:0;font-size:.9rem}
+    .funnels-filter-close{height:30px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
+    .funnels-filter-group{display:flex;flex-direction:column;gap:6px}
+    .funnels-filter-label{font-size:.76rem;font-weight:700;color:#334155}
+    .funnels-radio-list{display:flex;flex-direction:column;gap:6px}
+    .funnels-radio-item{display:flex;align-items:center;gap:8px;font-size:.78rem;color:#334155}
+    .funnels-select,.funnels-date,.funnels-input{height:34px;border:1px solid #cbd5e1;border-radius:8px;padding:0 8px;background:#fff;font-size:.8rem}
+    .funnels-clear-btn{height:34px;border:1px solid #b91c1c;border-radius:8px;background:#ef4444;color:#fff;font-size:.78rem;font-weight:700;cursor:pointer}
+    @media (max-width: 920px){
+      body{font-size:16px}
+      .wa-page{padding:7px;gap:7px}
+      .wa-rail{width:68px;flex-basis:68px;padding:8px 6px}
+      .wa-rail.expanded{width:200px;flex-basis:200px}
+      .wa-rail-btn{height:40px;font-size:.68rem}
+      .wa-shell{grid-template-columns:24% 1fr;overflow:auto;align-content:start;gap:8px}
+      #waPanelChats .wa-shell{grid-template-columns:24% minmax(0,1fr);gap:8px !important}
+      #waPanelChats .wa-sidebar{grid-column:1}
+      #waPanelChats .wa-main{grid-column:2}
+      #waPanelChats .wa-rightbar{grid-column:1 / -1}
+      .wa-rightbar{grid-column:1/-1;max-height:none;min-height:220px}
+      .wa-main{min-height:52dvh}
+      #waPanelChats .wa-main{min-height:0;height:100%}
+      .wa-select{min-width:100px;max-width:130px}
+      .analytics-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .funnels-board-select{min-width:150px}
+    }
+    @media (max-width: 640px){
+      body{font-size:15px}
+      .wa-page{padding:5px;gap:5px}
+      .wa-rail{width:56px;flex-basis:56px;border-radius:10px}
+      .wa-rail.expanded{width:180px;flex-basis:180px}
+      .wa-rail-btn{height:36px;font-size:.62rem;border-radius:8px}
+      .wa-rail-title{display:none}
+      .wa-panel.active{overflow:auto}
+      .wa-shell{grid-template-columns:1fr;gap:6px;overflow:auto;align-content:start}
+      #waPanelChats .wa-shell{grid-template-columns:1fr;gap:6px !important}
+      #waPanelChats .wa-sidebar,#waPanelChats .wa-main,#waPanelChats .wa-rightbar{grid-column:1}
+      .wa-sidebar{display:none}
+      .wa-main{min-height:58dvh}
+      #waPanelChats .wa-main{min-height:0;height:100%}
+      .wa-rightbar{max-height:none;min-height:240px}
+      .wa-right-card{max-height:none;overflow:auto}
+      .wa-pill-btn{font-size:.68rem;padding:6px}
+      .wa-avatar{width:38px;height:38px}
+      .wa-contact-avatar{width:28px;height:28px;font-size:.66rem}
+      .wa-contact-row{padding:6px 4px}
+      .wa-contact-title{font-size:.74rem}
+      .wa-contact-preview{font-size:.68rem}
+      .wa-contact-time{font-size:.62rem}
+      .module-title{font-size:.95rem}
+      .wa-topbar{padding:2px 4px}
+      .wa-brand{font-size:.92rem}
+      .wa-top-actions{min-width:0;width:auto;flex:1}
+      .wa-top-search{min-width:120px;max-width:none;height:34px;font-size:.78rem}
+      .wa-top-search-input{min-width:120px;max-width:none;height:34px;font-size:.78rem}
+      .wa-top-filter-btn{height:34px;font-size:.74rem;padding:0 10px}
+      .wa-top-add-btn{height:34px;font-size:.74rem;padding:0 10px}
+      .wa-add-popover{right:0;top:38px;width:min(320px,96vw)}
+      .wa-crmbar{gap:4px;padding:4px 0;flex-wrap:wrap;overflow:visible}
+      .wa-select{height:29px;min-width:90px;max-width:118px;font-size:.68rem;padding:0 6px}
+      .wa-icon-btn{height:29px;min-width:29px;padding:0 5px}
+      .wa-simple-grid{grid-template-columns:1fr}
+      .wa-settings-wrap{grid-template-columns:1fr}
+      .wa-settings-head{flex-direction:column;align-items:flex-start}
+      .wa-settings-tools-left{width:100%}
+      .wa-settings-search{min-width:0;width:100%}
+      .wa-users-input{min-width:0;width:100%}
+      .wa-qr-composer-grid{grid-template-columns:1fr}
+      .wa-qr-tabs{gap:5px}
+      .wa-qr-tab-btn{flex:1 1 calc(50% - 6px);min-width:130px}
+      .dash-grid{grid-template-columns:1fr}
+      .dash-kpi{grid-template-columns:1fr}
+      .analytics-grid{grid-template-columns:1fr}
+      .analytics-range-row{flex-direction:column;align-items:stretch}
+      .analytics-tools-row{flex-direction:column;align-items:stretch}
+      .analytics-filter{min-width:0;width:100%}
+      .lead-popup{grid-template-columns:1fr;height:min(88vh,760px)}
+      .lead-popup-left{border-right:none;border-bottom:1px solid #e2e8f0}
+      .funnels-wrap{flex-direction:column}
+      .funnels-section-head{flex-direction:column;align-items:stretch}
+      .funnels-section-controls{width:100%}
+      .funnels-board-select{flex:1;min-width:0}
+      .funnels-filters.open{width:100%;flex-basis:auto;min-height:300px}
+      .funnel-col{flex:0 0 270px;max-width:270px}
+      .wa-panel.wa-chat-overlay-open{top:54px;right:6px;bottom:6px;left:6px}
+      .wa-chat-overlay-close{top:10px;right:8px;height:32px;padding:0 9px;font-size:.72rem}
+      .wa-media-modal{height:min(90vh,860px);width:min(96vw,1200px)}
+      .wa-media-search{min-width:140px;width:100%}
+      .wa-events-grid{grid-template-columns:1fr}
+      .wa-events-kpi{grid-template-columns:1fr}
+      .wa-events-row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wa-page">
+    <nav class="wa-rail" id="waRail" aria-label="Modulos">
+      <div class="wa-rail-title">Mod</div>
+      <button id="waRailToggle" class="wa-rail-toggle" title="Expandir barra" aria-label="Expandir barra">></button>
+      <button class="wa-rail-btn active" data-module="dashboard" title="Dashboard" aria-label="Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="4" width="7" height="4" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="10" width="7" height="10" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span class="wa-rail-label">DASHBOARD</span>
+      </button>
+      <button class="wa-rail-btn" data-module="funnels" title="Etapas" aria-label="Etapas">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="wa-rail-label">ETAPAS</span>
+      </button>
+      <button class="wa-rail-btn" data-module="chats" title="Chat" aria-label="Chat">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5a2.5 2.5 0 0 1 2.5-2.5h11A2.5 2.5 0 0 1 20 5.5v7A2.5 2.5 0 0 1 17.5 15H9l-4 4v-4.5A2.5 2.5 0 0 1 4 12.5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="wa-rail-label">CHAT</span>
+      </button>
+      <button class="wa-rail-btn" data-module="broadcasts" title="Mensajes masivos" aria-label="Mensajes masivos">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h16M4 7h11M4 17h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M16.5 6.5 20 4v16l-3.5-2.5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <span class="wa-rail-label">MASIVOS</span>
+      </button>
+      <button class="wa-rail-btn" data-module="multimedia" title="Multimedia" aria-label="Multimedia">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="m8 13 2.5-2.8L13 13l2-2.2 3 3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="8.8" r="1.2" fill="currentColor"/><path d="M8 19h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="wa-rail-label">MULTIMEDIA</span>
+      </button>
+      <button class="wa-rail-btn" data-module="directory" title="Directorio" aria-label="Directorio">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4h11v16H7z" stroke="currentColor" stroke-width="1.8"/><path d="M7 8h11M7 12h11M7 16h11M4 6h1M4 10h1M4 14h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="wa-rail-label">DIRECTORIO</span>
+      </button>
+      <button class="wa-rail-btn" data-module="automation" title="Automatizaciones" aria-label="Automatizaciones">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h5l2-6 2 12 2-6h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="wa-rail-label">AUTOMATIZACIONES</span>
+      </button>
+      <button class="wa-rail-btn" data-module="analytics" title="Analitica" aria-label="Analitica">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19h16M7 16v-4M12 16V8M17 16v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="wa-rail-label">ANALITICA</span>
+      </button>
+      <button class="wa-rail-btn" data-module="settings" title="Ajustes" aria-label="Ajustes">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8.7a3.3 3.3 0 1 1 0 6.6 3.3 3.3 0 0 1 0-6.6Z" stroke="currentColor" stroke-width="1.8"/><path d="m19.2 13.3.8-1.3-.8-1.3-1.8-.2a5.8 5.8 0 0 0-.6-1.3l1.1-1.5-.4-1.4-1.8-.4-1.5 1.1c-.4-.2-.8-.4-1.3-.5L12 3l-1.4.8-.2 1.8c-.5.1-.9.3-1.3.6L7.6 5.1l-1.4.4-.4 1.8 1.1 1.5c-.2.4-.4.8-.5 1.3L4.6 10l-.8 1.4.8 1.4 1.8.2c.1.5.3.9.6 1.3l-1.1 1.5.4 1.4 1.8.4 1.5-1.1c.4.2.8.4 1.3.5l.2 1.8 1.4.8 1.4-.8.2-1.8c.5-.1.9-.3 1.3-.6l1.5 1.1 1.4-.4.4-1.8-1.1-1.5c.2-.4.4-.8.5-1.3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        <span class="wa-rail-label">AJUSTES</span>
+      </button>
+      <div class="wa-profile-box" title="Perfil">
+        <img class="wa-profile-pic" src="https://i.pravatar.cc/64?u=maq-imprenta" alt="Perfil">
+        <span class="wa-profile-name">Mi Perfil</span>
+      </div>
+    </nav>
+
+    <div class="wa-app">
+      <div class="wa-topbar">
+        <div class="wa-brand" id="waModuleTitle">MAQUILEROS - DASHBOARD</div>
+        <div class="wa-top-actions">
+          <button id="waLeadSearchOpen" class="wa-top-search" type="button" aria-label="Buscar leads">Buscar leads...</button>
+          <div id="waFunnelsTopControls" class="wa-funnels-top-controls" aria-hidden="true">
+            <button id="waFunnelsSearchInput" class="wa-top-search" type="button" aria-label="Buscar leads en etapas">Buscar leads...</button>
+            <button id="waFunnelsAddLeadBtn" class="wa-top-add-btn" type="button" aria-label="Agregar lead">Agregar lead</button>
+            <button id="waFunnelsFiltersToggle" class="wa-top-filter-btn" type="button" aria-label="Abrir filtros avanzados">Filtros</button>
+            <div id="waAddLeadPopover" class="wa-add-popover" aria-hidden="true">
+              <h4 class="wa-add-popover-title">Nuevo lead</h4>
+              <div class="wa-add-popover-field">
+                <label for="waAddLeadName">Nombre</label>
+                <input id="waAddLeadName" class="wa-add-popover-input" type="text" placeholder="Nombre del lead">
+              </div>
+              <div class="wa-add-popover-grid">
+                <div class="wa-add-popover-field">
+                  <label for="waAddLeadPrefix">Prefijo</label>
+                  <input id="waAddLeadPrefix" class="wa-add-popover-input" type="text" value="+52" placeholder="+52">
+                </div>
+                <div class="wa-add-popover-field">
+                  <label for="waAddLeadPhone">Telefono</label>
+                  <input id="waAddLeadPhone" class="wa-add-popover-input" type="text" placeholder="5512345678">
+                </div>
+              </div>
+              <div class="wa-add-popover-field">
+                <label for="waAddLeadTarget">Embudo</label>
+                <select id="waAddLeadTarget" class="wa-add-popover-select"></select>
+              </div>
+              <div class="wa-add-popover-actions">
+                <button id="waAddLeadCancel" class="wa-add-popover-cancel" type="button">Cancelar</button>
+                <button id="waAddLeadSave" class="wa-add-popover-save" type="button">Guardar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <section class="wa-panel active" id="waPanelDashboard" data-panel="dashboard">
+        <div class="dash-wrap">
+          <div class="dash-hello">
+            <h3 id="dashGreeting">Hola, Axel 👋</h3>
+            <p>Este es el estatus actual de tu espacio de trabajo</p>
+          </div>
+          <div class="dash-grid">
+            <div class="dash-card">
+              <h3>Avance de tus leads</h3>
+              <p class="dash-sub" id="dashSummaryDate">Resumen de la actividad de tus leads del: --/--/----</p>
+              <div class="dash-kpi">
+                <div class="dash-kpi-box">
+                  <div class="dash-kpi-label">Leads generados</div>
+                  <div class="dash-kpi-value" id="dashLeadsGenerated">0</div>
+                </div>
+                <div class="dash-kpi-box">
+                  <div class="dash-kpi-label">Leads ganados</div>
+                  <div class="dash-kpi-value" id="dashLeadsWon">0</div>
+                </div>
+                <div class="dash-kpi-box">
+                  <div class="dash-kpi-label">Leads sin atender</div>
+                  <div class="dash-kpi-value alert" id="dashLeadsUnattended">0</div>
+                </div>
+              </div>
+            </div>
+            <div class="dash-card">
+              <h3>Usuarios de tu equipo</h3>
+              <p class="dash-sub">Verifica el estado de conexion y los roles de tu equipo</p>
+              <div class="team-list" id="dashTeamList"></div>
+              <button id="dashManageUsersBtn" class="wa-pill-btn" type="button">Gestion de usuarios</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="wa-panel" id="waPanelFunnels" data-panel="funnels">
+        <div class="funnels-section">
+          <div class="funnels-section-head">
+            <h3 id="waFunnelsBoardNameText" class="funnels-section-title">Embudo activo: VENTAS MENUDEO</h3>
+            <div class="funnels-section-controls">
+              <select id="waFunnelsBoardSelect" class="funnels-board-select" aria-label="Seleccionar embudo"></select>
+              <button id="waFunnelsAddBoardBtn" class="wa-pill-btn" type="button">Nuevo embudo</button>
+            </div>
+          </div>
+          <div class="funnels-wrap">
+            <div id="waFunnelsBoardShell" class="funnels-board-shell">
+              <button id="waFunnelsAlertLeft" class="funnels-alert-arrow left" type="button" aria-label="Hay columnas pendientes a la izquierda" title="Columnas pendientes a la izquierda">&#9664;</button>
+              <button id="waFunnelsAlertRight" class="funnels-alert-arrow right" type="button" aria-label="Hay columnas pendientes a la derecha" title="Columnas pendientes a la derecha">&#9654;</button>
+              <div id="waFunnelsPriorityQueue" class="funnels-priority-queue"></div>
+              <div id="waFunnelsBoard" class="funnels-board"></div>
+            </div>
+            <aside id="waFunnelsFilters" class="funnels-filters" aria-label="Filtros avanzados">
+              <div class="funnels-filters-wrap">
+                <div class="funnels-filter-head">
+                  <h3 class="funnels-filter-title">Filtros avanzados</h3>
+                  <button id="waFunnelsFiltersClose" class="funnels-filter-close" type="button">Cerrar</button>
+                </div>
+
+                <div class="funnels-filter-group">
+                  <div class="funnels-filter-label">Mensajes</div>
+                  <div class="funnels-radio-list">
+                    <label class="funnels-radio-item"><input type="radio" name="funnelMsgFilter" value="all" checked> Todos</label>
+                    <label class="funnels-radio-item"><input type="radio" name="funnelMsgFilter" value="read"> Leidos</label>
+                    <label class="funnels-radio-item"><input type="radio" name="funnelMsgFilter" value="unread"> No leidos</label>
+                  </div>
+                </div>
+
+                <div class="funnels-filter-group">
+                  <label class="funnels-filter-label" for="waFunnelsDateFilter">Fecha</label>
+                  <input id="waFunnelsDateFilter" class="funnels-date" type="date">
+                </div>
+
+                <div class="funnels-filter-group">
+                  <div class="funnels-filter-label">Estatus</div>
+                  <div id="waFunnelsStatusList" class="funnels-radio-list"></div>
+                </div>
+
+                <div class="funnels-filter-group">
+                  <div class="funnels-filter-label">Integracion</div>
+                  <div class="funnels-radio-list">
+                    <label class="funnels-radio-item"><input type="radio" name="funnelChannelFilter" value="all" checked> Todos</label>
+                    <label class="funnels-radio-item"><input type="radio" name="funnelChannelFilter" value="whatsapp"> WhatsApp</label>
+                    <label class="funnels-radio-item"><input type="radio" name="funnelChannelFilter" value="messenger"> Messenger</label>
+                    <label class="funnels-radio-item"><input type="radio" name="funnelChannelFilter" value="instagram"> Instagram</label>
+                  </div>
+                </div>
+
+                <div class="funnels-filter-group">
+                  <label class="funnels-filter-label" for="waFunnelsTagSearch">Etiquetas</label>
+                  <input id="waFunnelsTagSearch" class="funnels-input" type="search" placeholder="Buscar etiqueta...">
+                </div>
+
+                <div class="funnels-filter-group">
+                  <label class="funnels-filter-label" for="waFunnelsUserFilter">Usuarios</label>
+                  <select id="waFunnelsUserFilter" class="funnels-select">
+                    <option value="">Todos</option>
+                  </select>
+                </div>
+
+                <button id="waFunnelsClearFilters" class="funnels-clear-btn" type="button">Limpiar filtros</button>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="wa-panel" id="waPanelChats" data-panel="chats">
+        <div class="wa-shell">
+          <aside class="wa-sidebar">
+            <div class="wa-card">
+              <div class="wa-search-wrap">
+                <input id="waSearchContact" class="wa-search" placeholder="Buscar cliente o telefono">
+              </div>
+              <div class="wa-quick-filters" id="waChatQuickFilters">
+                <button type="button" class="wa-quick-filter-btn active" data-chat-filter="all">Todos</button>
+                <button type="button" class="wa-quick-filter-btn" data-chat-filter="assigned">Asignados a mi</button>
+                <button type="button" class="wa-quick-filter-btn" data-chat-filter="unread">No leidos</button>
+                <button type="button" class="wa-quick-filter-btn" data-chat-filter="archived">Archivados</button>
+              </div>
+              <div id="waContactsList" class="wa-contacts"></div>
+            </div>
+          </aside>
+          <main class="wa-main">
+            <div class="wa-card">
+              <div class="wa-header">
+                <div class="wa-avatar" id="waHeaderAvatar">--</div>
+                <div style="flex:1;min-width:0;">
+                  <div id="waSelectedName" class="title">Selecciona un contacto</div>
+                  <div id="waSelectedPhone" class="subtitle"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex:0 0 auto;">
+                  <span id="waAssignedBadge" class="unread-badge" style="display:none">Asignado</span>
+                  <button id="waLeadHistoryBtn" class="wa-history-btn" type="button">Historial</button>
+                </div>
+              </div>
+              <div class="wa-crmbar">
+                <select id="waFunnelSelect" class="wa-select" title="Etapa de ventas"></select>
+                <select id="waAgentSelect" class="wa-select" title="Agente asignado"></select>
+                <select id="waStatusSelect" class="wa-select small" title="Estatus"></select>
+                <button id="waArchiveBtn" class="wa-icon-btn" title="Archivar" aria-label="Archivar">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="4" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 9h13v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.8"/><path d="M9 13h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </button>
+                <button id="waCloseWonBtn" class="wa-icon-btn" title="Marcar vendido y pasar a cierre" aria-label="Marcar vendido">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 4 4 10-10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <div id="waConversation" class="wa-conversation"></div>
+              <div id="waReplyPreview" class="wa-reply-preview" aria-hidden="true">
+                <div class="wa-reply-preview-main">
+                  <div id="waReplyPreviewSender" class="wa-reply-preview-sender"></div>
+                  <div id="waReplyPreviewText" class="wa-reply-preview-text"></div>
+                </div>
+                <button id="waReplyPreviewClose" class="wa-reply-preview-close" type="button" aria-label="Cancelar respuesta">x</button>
+              </div>
+              <div class="wa-composer-wrap">
+                <div id="waQuickReplySmartBar" class="wa-quickreply-smart" style="display:none"></div>
+                <div class="wa-send-wrap">
+                  <button id="waEmojiBtn" class="wa-msg-tool-btn" type="button" title="Emojis" aria-label="Emojis">☺</button>
+                  <button id="waQuickAddBtn" class="wa-msg-tool-btn" type="button" title="Opciones" aria-label="Opciones">✕</button>
+                  <div id="waComposerMoreMenu" class="wa-composer-more-menu" aria-hidden="true">
+                    <button type="button" class="wa-composer-more-item" data-action="add-note">Agregar nota</button>
+                    <button type="button" class="wa-composer-more-item" data-action="schedule-event">Agendar evento</button>
+                    <button type="button" class="wa-composer-more-item" data-action="upload-file">Subir archivo</button>
+                    <button type="button" class="wa-composer-more-item" data-action="send-location">Enviar ubicacion</button>
+                    <button type="button" class="wa-composer-more-item" data-action="quick-replies">Respuestas rapidas</button>
+                    <button type="button" class="wa-composer-more-item" data-action="schedule-message">Programar mensaje</button>
+                  </div>
+                  <textarea id="waMessageInput" rows="2" class="wa-textarea" placeholder="Escribe un mensaje..."></textarea>
+                  <button id="waQuickRepliesBtn" class="wa-msg-action-btn" type="button" title="Respuestas rapidas" aria-label="Respuestas rapidas">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 7h14v8H9l-4 3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 10h6M9 13h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </button>
+                  <button id="waScheduleEventBtn" class="wa-msg-action-btn" type="button" title="Agendar evento" aria-label="Agendar evento">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="6" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 4v4M16 4v4M4 10h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </button>
+                  <button id="waScheduleMessageBtn" class="wa-msg-action-btn" type="button" title="Programar mensaje" aria-label="Programar mensaje">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <button id="waSendAudioBtn" class="wa-msg-action-btn" type="button" title="Mandar audio" aria-label="Mandar audio">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="10" y="4" width="4" height="9" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 11a5 5 0 0 0 10 0M12 16v4M9 20h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </button>
+                  <button id="waSendBtn" class="wa-pill-btn">Enviar</button>
+                  <input id="waUploadAnyFileInput" type="file" style="display:none" multiple>
+                </div>
+              </div>
+            </div>
+          </main>
+          <aside class="wa-rightbar">
+            <div class="wa-right-card">
+              <h3 class="wa-right-title">Ficha del cliente</h3>
+              <div class="wa-right-tabs" id="waRightTabs" role="tablist" aria-label="Secciones de ficha">
+                <button type="button" class="wa-right-tab active" data-right-tab="attributes" role="tab" aria-selected="true">Atributos</button>
+                <button type="button" class="wa-right-tab" data-right-tab="notes" role="tab" aria-selected="false">Notas</button>
+                <button type="button" class="wa-right-tab" data-right-tab="messages" role="tab" aria-selected="false">Mensajes</button>
+              </div>
+
+              <section id="waAttributesSection" class="wa-right-pane active" data-right-pane="attributes" role="tabpanel">
+                <div class="wa-acc-content">
+                  <label class="wa-attr-label" for="waAttrName">Nombre</label>
+                  <input id="waAttrName" class="wa-attr-input" type="text" placeholder="Nombre del cliente">
+                  <label class="wa-attr-label" for="waAttrPhone">Medio</label>
+                  <input id="waAttrPhone" class="wa-attr-input" type="text" readonly>
+                  <label class="wa-attr-label" for="waAttrEmail">Correo</label>
+                  <input id="waAttrEmail" class="wa-attr-input" type="email" placeholder="correo@empresa.com">
+                  <label class="wa-attr-label" for="waAttrCompany">Empresa</label>
+                  <input id="waAttrCompany" class="wa-attr-input" type="text" placeholder="Nombre de empresa">
+                  <label class="wa-attr-label" for="waAttrTags">Tags</label>
+                  <div class="wa-tags-editor" id="waAttrTagsEditor">
+                    <div id="waAttrTagsChips" class="wa-tags-chips"></div>
+                    <input id="waAttrTags" class="wa-tag-input" type="text" placeholder="Escribe tag y Enter">
+                  </div>
+                </div>
+              </section>
+
+              <section id="waNotesSection" class="wa-right-pane" data-right-pane="notes" role="tabpanel">
+                <div class="wa-acc-content">
+                  <ul id="waNotesList" class="wa-list"></ul>
+                </div>
+              </section>
+
+              <section id="waMessagesSection" class="wa-right-pane" data-right-pane="messages" role="tabpanel">
+                <div class="wa-acc-content">
+                  <div id="waPinnedSection" class="wa-msg-subsection">
+                    <div class="wa-attr-label">Mensajes destacados</div>
+                    <ul id="waPinnedList" class="wa-list"></ul>
+                  </div>
+                  <div id="waScheduledSection" class="wa-msg-subsection">
+                    <div class="wa-attr-label">Mensajes programados</div>
+                    <ul id="waScheduledList" class="wa-list"></ul>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="wa-panel" id="waPanelBroadcasts" data-panel="broadcasts">
+        <div class="wa-mass-module-wrap">
+          <div class="wa-mass-module-inner">
+            <div class="wa-mass-module-head">
+              <h3 class="wa-mass-module-title">Mensajes Automaticos Masivos</h3>
+              <p class="wa-mass-module-sub">Envia una respuesta rapida a segmentos basados en ultima respuesta rapida, estado de respuesta y una entrega clara por ventana de 24 horas.</p>
+            </div>
+            <div class="wa-mass-split">
+              <div class="wa-mass-split-left">
+                <div id="waMassPanel" class="wa-mass-panel module wa-mass-form-panel">
+                  <div class="wa-mass-head">
+                    <h4 class="wa-mass-title">Campana masiva</h4>
+                  </div>
+                  <div class="wa-mass-note">Regla: enviar <strong>/respuesta</strong> a clientes cuya ultima respuesta rapida fue otra <strong>/respuesta</strong>.</div>
+                  <div class="wa-mass-grid">
+                <label class="wa-mass-label" for="waMassSendReplySelect">Respuesta rapida a enviar</label>
+                <select id="waMassSendReplySelect" class="wa-mass-select" aria-label="Respuesta rapida a enviar"></select>
+                <label class="wa-mass-label" for="waMassTriggerSearchInput">Si su ultima respuesta rapida fue</label>
+                <div class="wa-mass-tag-picker">
+                  <input id="waMassTriggerSearchInput" class="wa-mass-tag-input" type="text" list="waMassTriggerDatalist" placeholder="Busca /respuesta y presiona Agregar">
+                  <button id="waMassTriggerAddBtn" class="wa-mass-tag-add" type="button">Agregar</button>
+                </div>
+                <datalist id="waMassTriggerDatalist"></datalist>
+                <div id="waMassTriggerTags" class="wa-mass-tags" aria-live="polite"></div>
+                <label class="wa-mass-label" for="waMassResponseStateSelect">Estado de respuesta del cliente</label>
+                <div class="wa-mass-tag-picker">
+                  <select id="waMassResponseStateSelect" class="wa-mass-select" aria-label="Seleccionar estado de respuesta del cliente">
+                    <option value="">Selecciona estado...</option>
+                    <option value="all">Todos</option>
+                    <option value="replied">Respondio</option>
+                    <option value="no-reply">No respondio</option>
+                  </select>
+                  <button id="waMassResponseStateAddBtn" class="wa-mass-tag-add" type="button">Agregar</button>
+                </div>
+                <div id="waMassResponseStateTags" class="wa-mass-tags" aria-live="polite"></div>
+                <div class="wa-mass-help">Debes agregar al menos un estado de respuesta.</div>
+                <div class="wa-mass-help">El sistema decide automaticamente: dentro de 24h envia mensaje normal; fuera de 24h envia plantilla Meta.</div>
+                <div class="wa-mass-conditions">
+                <label class="wa-mass-label" for="waMassDelayUnit">Aplicar regla</label>
+                <select id="waMassDelayUnit" class="wa-mass-select" aria-label="Tipo de regla por hora o por dia">
+                  <option value="hour">POR HORA</option>
+                  <option value="day">POR DIA</option>
+                </select>
+                <div id="waMassDelayHoursWrap">
+                  <label class="wa-mass-label" for="waMassDelayHours">Horas despues de la respuesta disparadora (1 a 23)</label>
+                  <input id="waMassDelayHours" class="wa-mass-days-input" type="number" min="1" max="23" step="1" value="1" aria-label="Horas despues de la respuesta disparadora">
+                </div>
+                <div id="waMassDelayDaysWrap" style="display:none;">
+                  <label class="wa-mass-label" for="waMassDelayDays">Dias despues de la respuesta disparadora</label>
+                  <div class="wa-mass-days-row">
+                    <button id="waMassDelayDownBtn" class="wa-mass-step-btn" type="button" aria-label="Disminuir dias">-</button>
+                    <input id="waMassDelayDays" class="wa-mass-days-input" type="number" min="1" step="1" value="1" aria-label="Dias despues de la respuesta disparadora">
+                    <button id="waMassDelayUpBtn" class="wa-mass-step-btn" type="button" aria-label="Aumentar dias">+</button>
+                  </div>
+                </div>
+                <div class="wa-mass-help">Puedes escribir el numero o usar los botones + y -.</div>
+                </div>
+                <div class="wa-mass-section-title">EXCLUIR A</div>
+                <label class="wa-mass-label" for="waMassExcludeStatusSearchInput">Estatus a excluir</label>
+                <div class="wa-mass-tag-picker">
+                  <input id="waMassExcludeStatusSearchInput" class="wa-mass-tag-input" type="text" list="waMassStatusesDatalist" placeholder="Busca estatus y presiona Agregar">
+                  <button id="waMassExcludeStatusAddBtn" class="wa-mass-tag-add" type="button">Agregar</button>
+                </div>
+                <datalist id="waMassStatusesDatalist"></datalist>
+                <div id="waMassExcludeStatusesTags" class="wa-mass-tags" aria-live="polite"></div>
+                <label class="wa-mass-label" for="waMassExcludeReplySearchInput">Respuestas rapidas a excluir</label>
+                <div class="wa-mass-tag-picker">
+                  <input id="waMassExcludeReplySearchInput" class="wa-mass-tag-input" type="text" list="waMassRepliesDatalist" placeholder="Busca /respuesta y presiona Agregar">
+                  <button id="waMassExcludeReplyAddBtn" class="wa-mass-tag-add" type="button">Agregar</button>
+                </div>
+                <datalist id="waMassRepliesDatalist"></datalist>
+                <div id="waMassExcludeRepliesTags" class="wa-mass-tags" aria-live="polite"></div>
+                <div class="wa-mass-template-block">
+                  <p class="wa-mass-template-title">Plantilla por defecto: Texto + Foto</p>
+                  <label class="wa-mass-label" for="waMassTemplateNameInput">Nombre de plantilla Meta</label>
+                  <input id="waMassTemplateNameInput" class="wa-mass-select" type="text" placeholder="Nombre plantilla Meta (ej: follow_up_24h)">
+                  <label class="wa-mass-label" for="waMassTemplateTextInput">Texto de plantilla (si se deja vacio usa la respuesta rapida)</label>
+                  <input id="waMassTemplateTextInput" class="wa-mass-select" type="text" placeholder="Texto para variable body de la plantilla">
+                  <label class="wa-mass-label" for="waMassTemplateImageInput">Foto (URL publica)</label>
+                  <input id="waMassTemplateImageInput" class="wa-mass-select" type="url" placeholder="https://.../imagen.jpg">
+                </div>
+                <div class="wa-mass-row">
+                  <button id="waMassScheduleBtn" class="wa-mass-btn primary" type="button">GUARDAR</button>
+                </div>
+                <div id="waMassStatus" class="wa-mass-status">Sin ejecuciones.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="wa-mass-split-right">
+                <div class="wa-mass-panel module wa-mass-preview-panel" aria-label="Vista previa de regla masiva">
+                  <h5 class="wa-mass-preview-title">Vista Previa</h5>
+                  <p class="wa-mass-preview-sub">Revisa la respuesta disparadora y el mensaje que se enviara antes de guardar.</p>
+                  <div class="wa-mass-preview-card">
+                    <div class="wa-mass-preview-label">Respuesta disparadora</div>
+                    <div id="waMassPreviewTrigger" class="wa-mass-preview-list"></div>
+                  </div>
+                  <div class="wa-mass-preview-card">
+                    <div class="wa-mass-preview-label">Respuesta a enviar</div>
+                    <div id="waMassPreviewSend" class="wa-mass-preview-list"></div>
+                  </div>
+                  <div class="wa-mass-preview-card">
+                    <div class="wa-mass-preview-label">Condiciones de envio</div>
+                    <div id="waMassPreviewConditions" class="wa-mass-preview-value">Define tipo de espera y estado de respuesta del cliente.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="wa-panel" id="waPanelDirectory" data-panel="directory">
+        <div class="dir-wrap">
+          <div class="dir-tabs" role="tablist" aria-label="Filtro de directorio">
+            <button id="dirTabAll" class="dir-tab active" type="button" data-dir-filter="all" role="tab" aria-selected="true">Todos</button>
+            <button id="dirTabActive" class="dir-tab" type="button" data-dir-filter="active" role="tab" aria-selected="false">Activos</button>
+            <button id="dirTabArchived" class="dir-tab" type="button" data-dir-filter="archived" role="tab" aria-selected="false">Archivados</button>
+          </div>
+          <div class="dir-toolbar">
+            <button id="dirAssignUserBtn" class="dir-icon" title="Gestionar asignacion de usuarios" aria-label="Gestionar asignacion de usuarios"><svg viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4ZM4 20a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+            <button id="dirMoveBtn" class="dir-icon" title="Mover de etapa o estatus" aria-label="Mover de etapa o estatus"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16l-6 7v6l-4 2v-8z" stroke="currentColor" stroke-width="1.8"/></svg></button>
+            <button id="dirTagBtn" class="dir-icon" title="Asignar etiquetas" aria-label="Asignar etiquetas"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12 12 4l8 8-8 8-8-8Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></svg></button>
+            <button id="dirExportSelectedBtn" class="dir-icon" title="Descargar informacion de leads" aria-label="Descargar informacion de leads"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v10m0 0 4-4m-4 4-4-4M4 19h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+            <button id="dirToggleStateBtn" class="dir-icon" title="Cambiar estado (archivar o activar)" aria-label="Cambiar estado"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v4H4z" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 9h13v9a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="1.8"/></svg></button>
+            <button id="dirDeleteBtn" class="dir-icon" title="Eliminar" aria-label="Eliminar"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5h6v2m-8 0 1 12h8l1-12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+            <div id="dirSelectedInfo" class="dir-selected">0 leads seleccionados</div>
+            <button id="dirImportBtn" class="dir-big-btn" title="Importar leads">Importar leads</button>
+            <button id="dirExportAllBtn" class="dir-big-btn secondary" title="Descargar todos los leads">Descargar todos los leads</button>
+          </div>
+          <div class="dir-table-wrap">
+            <table class="dir-table">
+              <thead>
+                <tr>
+                  <th><input id="dirCheckAll" type="checkbox" aria-label="Seleccionar todos"></th>
+                  <th>Estado</th>
+                  <th>Nombre</th>
+                  <th>Ultimo mensaje</th>
+                  <th>Primer mensaje</th>
+                  <th>Usuario</th>
+                  <th>Etapa</th>
+                  <th>Estatus</th>
+                </tr>
+              </thead>
+              <tbody id="dirTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="wa-panel" id="waPanelAutomation" data-panel="automation">
+        <div class="wa-events-grid">
+          <div class="wa-events-card">
+            <h3>Eventos con clientes</h3>
+            <p class="wa-events-help">Esta seccion es para registrar y controlar pendientes por cliente: muestras, entregas, pagos, llamadas o cualquier compromiso.</p>
+
+            <div class="wa-events-focus">
+              <div class="wa-events-focus-title">Buscador de cliente</div>
+              <label class="wa-attr-label" for="waEventContactInput">Busca por nombre o telefono (tambien puedes escribirlo manualmente)</label>
+              <div class="wa-events-search-wrap">
+                <input id="waEventContactInput" class="wa-events-input" type="text" placeholder="Ej. Juan Perez o +5215512345678" autocomplete="off">
+                <div id="waEventContactResults" class="wa-events-search-results" aria-live="polite"></div>
+              </div>
+              <div class="wa-events-search-help">Tip: si escribes numeros, busca por telefono. Si escribes letras, busca por nombre.</div>
+            </div>
+
+            <ol class="wa-events-steps">
+              <li><strong>Paso 1:</strong> Escribe o busca el cliente en el buscador.</li>
+              <li><strong>Paso 2:</strong> Crea el evento con nombre, fecha y hora.</li>
+              <li><strong>Paso 3:</strong> Gestiona el estado: pendiente, hecho o cancelado.</li>
+            </ol>
+
+            <div class="wa-events-actions">
+              <button id="waEventCreateBtn" class="wa-events-primary-btn" type="button">Nuevo evento</button>
+              <button id="waEventOpenTodayBtn" class="wa-events-ghost-btn" type="button">Ver pendientes de hoy</button>
+            </div>
+            <div id="waEventsMessage" class="wa-events-message"></div>
+          </div>
+
+          <div class="wa-events-card">
+            <h3>Calendario de pendientes</h3>
+            <p class="wa-events-help">Filtra y revisa todos los eventos registrados para tu operacion diaria.</p>
+            <div class="wa-events-kpi">
+              <div class="wa-events-kpi-item">
+                <div class="wa-events-kpi-label">Pendientes</div>
+                <div id="waEventsKpiPending" class="wa-events-kpi-value">0</div>
+              </div>
+              <div class="wa-events-kpi-item">
+                <div class="wa-events-kpi-label">Prox. 24h</div>
+                <div id="waEventsKpiNext24h" class="wa-events-kpi-value">0</div>
+              </div>
+              <div class="wa-events-kpi-item">
+                <div class="wa-events-kpi-label">Vencidos</div>
+                <div id="waEventsKpiOverdue" class="wa-events-kpi-value">0</div>
+              </div>
+            </div>
+
+            <div class="wa-events-toolbar">
+              <input id="waEventFilterDateInput" class="wa-events-input" type="date" aria-label="Filtrar por fecha" title="Filtrar por fecha">
+              <select id="waEventFilterStatusSelect" class="wa-events-select" aria-label="Filtrar por estado">
+                <option value="pending" selected>Pendientes</option>
+                <option value="all">Todos</option>
+                <option value="done">Completados</option>
+                <option value="canceled">Cancelados</option>
+              </select>
+              <button id="waEventFilterTodayBtn" class="wa-events-ghost-btn" type="button">Hoy</button>
+              <button id="waEventFilterClearBtn" class="wa-events-ghost-btn" type="button">Limpiar</button>
+            </div>
+
+            <div id="waEventsList" class="wa-events-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="wa-panel" id="waPanelAnalytics" data-panel="analytics">
+        <div class="analytics-wrap">
+          <div class="analytics-head">
+            <h3 class="analytics-title">📊 Analitica</h3>
+            <div class="analytics-range-row">
+              <label for="waAnalyticsFrom">Selecciona el periodo</label>
+              <input id="waAnalyticsFrom" class="analytics-date" type="date">
+              <span>-</span>
+              <input id="waAnalyticsTo" class="analytics-date" type="date">
+              <button id="waAnalyticsLast7Btn" class="analytics-btn" type="button">Ultimos 7 dias</button>
+              <button id="waAnalyticsLast30Btn" class="analytics-btn" type="button">Ultimos 30 dias</button>
+            </div>
+            <div class="analytics-tools-row">
+              <div class="analytics-filters">
+                <select id="waAnalyticsAgentFilter" class="analytics-filter" aria-label="Filtrar por agente">
+                  <option value="all">Todos los agentes</option>
+                </select>
+                <select id="waAnalyticsFunnelFilter" class="analytics-filter" aria-label="Filtrar por embudo">
+                  <option value="all">Todos los embudos</option>
+                </select>
+                <select id="waAnalyticsStatusFilter" class="analytics-filter" aria-label="Filtrar por estatus">
+                  <option value="all">Todos los estatus</option>
+                </select>
+              </div>
+              <div class="analytics-actions">
+                <button id="waAnalyticsClearFiltersBtn" class="analytics-btn" type="button">Limpiar filtros</button>
+                <button id="waAnalyticsExportBtn" class="analytics-btn primary" type="button">Exportar CSV</button>
+              </div>
+            </div>
+            <div id="waAnalyticsRangeLabel" class="analytics-meta"></div>
+            <div id="waAnalyticsUpdated" class="analytics-meta"></div>
+            <div class="analytics-meta">Los datos se muestran en dias completos segun horario UTC 0</div>
+          </div>
+
+          <div class="analytics-grid">
+            <div class="analytics-card"><div class="analytics-card-title">Nuevos leads</div><div id="waAnalyticsLeadsNewValue" class="analytics-card-value">0</div><div id="waAnalyticsLeadsNewSub" class="analytics-card-sub">0 Leads</div><div id="waAnalyticsLeadsNewDelta" class="analytics-card-delta">+0%</div></div>
+            <div class="analytics-card"><div class="analytics-card-title">Mensajes recibidos</div><div id="waAnalyticsMsgInValue" class="analytics-card-value">0</div><div id="waAnalyticsMsgInSub" class="analytics-card-sub">0 Mensajes</div><div id="waAnalyticsMsgInDelta" class="analytics-card-delta">+0%</div></div>
+            <div class="analytics-card"><div class="analytics-card-title">Mensajes enviados</div><div id="waAnalyticsMsgOutValue" class="analytics-card-value">0</div><div id="waAnalyticsMsgOutSub" class="analytics-card-sub">0 Mensajes</div><div id="waAnalyticsMsgOutDelta" class="analytics-card-delta">+0%</div></div>
+            <div class="analytics-card"><div class="analytics-card-title">Ganancias</div><div id="waAnalyticsRevenueValue" class="analytics-card-value">$0</div><div id="waAnalyticsRevenueSub" class="analytics-card-sub">$0 MXN</div><div id="waAnalyticsRevenueDelta" class="analytics-card-delta">+0%</div></div>
+            <div class="analytics-card"><div class="analytics-card-title">Leads ganados</div><div id="waAnalyticsWonValue" class="analytics-card-value">0</div><div id="waAnalyticsWonSub" class="analytics-card-sub">0 Leads</div><div id="waAnalyticsWonDelta" class="analytics-card-delta">+0%</div></div>
+            <div class="analytics-card"><div class="analytics-card-title">Leads sin atender</div><div id="waAnalyticsUnattendedValue" class="analytics-card-value">0</div><div id="waAnalyticsUnattendedSub" class="analytics-card-sub">0 Leads</div><div id="waAnalyticsUnattendedDelta" class="analytics-card-delta">+0%</div></div>
+          </div>
+
+          <div class="analytics-table-wrap">
+            <table class="analytics-table">
+              <thead>
+                <tr>
+                  <th>Agente</th>
+                  <th>Nuevos leads</th>
+                  <th>Mensajes enviados</th>
+                  <th>Ganancias</th>
+                  <th>Leads ganados</th>
+                  <th>Leads sin atender</th>
+                </tr>
+              </thead>
+              <tbody id="waAnalyticsAgentsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="wa-panel" id="waPanelSettings" data-panel="settings">
+        <div class="wa-settings-shell">
+          <div class="wa-settings-tabs" role="tablist" aria-label="Pestanas de ajustes">
+            <button type="button" class="wa-settings-tab active" data-settings-tab="crm">Etapas y Estatus</button>
+            <button type="button" class="wa-settings-tab" data-settings-tab="funnels">Embudos</button>
+            <button type="button" class="wa-settings-tab" data-settings-tab="users">Usuarios</button>
+            <button type="button" class="wa-settings-tab" data-settings-tab="replies">Respuestas rapidas</button>
+          </div>
+          <div class="wa-settings-pane active" id="waSettingsPaneCrm">
+            <div class="wa-settings-pane-actions">
+              <button id="waSettingsSaveCrmBtn" class="wa-pill-btn" type="button">Guardar</button>
+            </div>
+            <div id="waCfgMessage" class="wa-settings-pane-message"></div>
+            <div class="wa-settings-wrap" style="grid-template-columns:1fr;">
+              <div class="wa-settings-stack">
+                <div class="wa-settings-card">
+                  <div class="wa-settings-kicker">Estructura CRM</div>
+                  <h3>Etapas y Estatus</h3>
+                  <p class="wa-settings-note">Elige el tipo de catalogo, agrega desde popup y administra todo en una sola tabla con trazabilidad.</p>
+                  <div class="wa-catalog-toolbar">
+                    <select id="waCatalogType" class="wa-catalog-select">
+                      <option value="funnel">Etapas</option>
+                      <option value="statuses">Estatus</option>
+                    </select>
+                    <button id="waCatalogAddBtn" class="wa-pill-btn" type="button">Agregar</button>
+                  </div>
+                  <div class="wa-catalog-table-wrap">
+                    <table class="wa-catalog-table">
+                      <thead>
+                        <tr>
+                          <th>Nombre</th>
+                          <th>Creado por</th>
+                          <th>Fecha y hora</th>
+                          <th>Clientes actuales</th>
+                          <th>Accion</th>
+                        </tr>
+                      </thead>
+                      <tbody id="waCatalogTableBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="wa-settings-card">
+                  <div class="wa-settings-kicker">Datos de prueba</div>
+                  <h3>Escenarios demo</h3>
+                  <p class="wa-settings-note">Activa clientes demo o genera un paquete completo de datos de prueba para todo el sistema.</p>
+
+                  <div class="wa-settings-inline">
+                    <input id="waDemoClientsEnabled" type="checkbox">
+                    <label class="wa-settings-label" for="waDemoClientsEnabled">Clientes demo (50 leads)</label>
+                    <button id="waDemoClientsApplyBtn" class="wa-pill-btn" type="button">Aplicar</button>
+                  </div>
+                  <div id="waDemoClientsMessage" class="wa-settings-note"></div>
+
+                  <div class="wa-settings-inline" style="margin-top:6px;">
+                    <input id="waDemoEverythingEnabled" type="checkbox">
+                    <label class="wa-settings-label" for="waDemoEverythingEnabled">Datos de prueba de todo</label>
+                    <button id="waDemoEverythingApplyBtn" class="wa-pill-btn" type="button">Aplicar</button>
+                  </div>
+                  <div id="waDemoEverythingMessage" class="wa-settings-note"></div>
+                </div>
+
+                <div class="wa-settings-card">
+                  <div class="wa-settings-kicker">Perfil</div>
+                  <h3>Perfil Inferior (Meta-safe)</h3>
+                  <p class="wa-settings-note">Configura la foto y nombre que aparecen abajo en la barra lateral. Validamos reglas para evitar nombres no permitidos por lineamientos tipo Meta.</p>
+                  <div class="wa-profile-editor">
+                    <img id="waProfilePreviewPic" class="wa-profile-preview-pic" src="https://i.pravatar.cc/64?u=maq-imprenta" alt="Vista previa de perfil">
+                    <div class="wa-profile-fields">
+                      <input id="waProfileNameInput" class="wa-profile-input" type="text" maxlength="60" placeholder="Nombre de perfil visible">
+                      <input id="waProfilePhotoInput" type="file" accept="image/png,image/jpeg,image/webp">
+                      <div class="wa-profile-actions">
+                        <button id="waProfileApplyBtn" class="wa-pill-btn" type="button">Aplicar perfil</button>
+                        <button id="waProfileResetBtn" class="wa-pill-btn" type="button" style="background:#94a3b8">Restaurar</button>
+                      </div>
+                      <div class="wa-profile-help">Reglas: 3-60 caracteres, sin URLs, sin palabras reservadas de marca (Meta/WhatsApp/Facebook), sin simbolos excesivos. Foto PNG/JPG/WEBP, max 5MB, cuadrada recomendada.</div>
+                      <div id="waProfileMessage" class="wa-settings-note"></div>
+                      <hr style="border:none;border-top:1px solid #e2e8f0;margin:4px 0">
+                      <input id="waMetaBusinessNameInput" class="wa-profile-input" type="text" maxlength="100" placeholder="Nombre de negocio en Meta (display name)">
+                      <div class="wa-profile-actions">
+                        <button id="waMetaBusinessNameApplyBtn" class="wa-pill-btn" type="button">Aplicar en Meta</button>
+                      </div>
+                      <div class="wa-profile-help">Nota: el display name de WhatsApp Business puede requerir aprobacion y gestionarse en Meta Manager.</div>
+                      <div id="waMetaBusinessNameMessage" class="wa-settings-note"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wa-settings-pane" id="waSettingsPaneUsers">
+            <div class="wa-settings-pane-actions">
+              <button id="waSettingsSaveUsersBtn" class="wa-pill-btn" type="button">Guardar</button>
+            </div>
+            <div class="wa-settings-wrap" style="grid-template-columns:1fr;">
+              <div class="wa-settings-card">
+                <div class="wa-settings-kicker">Acceso</div>
+                <h3>Control de Usuarios</h3>
+                <div class="wa-auth-status" id="waAuthStatus">Estado de sesion: sin autenticar</div>
+                <div class="wa-users-actions">
+                  <input id="waUserNameInput" class="wa-users-input" type="email" placeholder="correo@empresa.com">
+                  <button id="waAddUserBtn" class="wa-pill-btn" type="button">Registrar agente</button>
+                </div>
+                <div id="waUsersMessage" class="wa-settings-note"></div>
+                <div class="wa-users-table-wrap">
+                  <table class="wa-users-table">
+                    <thead>
+                      <tr>
+                        <th>Agente</th>
+                        <th>Correo Firebase</th>
+                        <th>Accion</th>
+                      </tr>
+                    </thead>
+                    <tbody id="waUsersTableBody"></tbody>
+                  </table>
+                </div>
+                <div class="wa-settings-note">Estos usuarios alimentan asignaciones, analitica y vistas de operacion.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wa-settings-pane" id="waSettingsPaneFunnels">
+            <div class="wa-settings-pane-actions">
+              <button id="waSettingsSaveFunnelsBtn" class="wa-pill-btn" type="button">Guardar</button>
+            </div>
+            <div class="wa-settings-wrap" style="grid-template-columns:1fr;">
+              <div class="wa-settings-card">
+                <div class="wa-settings-kicker">Enrutamiento</div>
+                <h3>Configuracion de Embudos</h3>
+                <p class="wa-settings-note">Marca el embudo principal. Los clientes que lleguen automaticamente se enviaran a ese embudo.</p>
+                <div id="waPrimaryFunnelBoardList" class="wa-settings-list-wrap"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wa-settings-pane" id="waSettingsPaneReplies">
+            <div class="wa-settings-pane-actions">
+              <button id="waSettingsSaveRepliesBtn" class="wa-pill-btn" type="button">Guardar</button>
+            </div>
+            <div class="wa-settings-wrap" style="grid-template-columns:1fr;">
+              <div class="wa-settings-card">
+                <div class="wa-settings-kicker">Plantillas</div>
+                <h3>Configuracion de Respuestas Rapidas</h3>
+                <p class="wa-settings-note">Se activan escribiendo <strong>/codigo</strong> en el chat. Cada respuesta tiene ID unico para seguimiento y automatizaciones.</p>
+                <div class="wa-settings-list-editor">
+                  <div class="wa-qr-composer">
+                    <div class="wa-qr-presets">
+                      <span class="wa-settings-note" style="margin:0">Plantillas:</span>
+                      <button type="button" class="wa-qr-preset-btn" data-qr-preset="precio">Precio</button>
+                      <button type="button" class="wa-qr-preset-btn" data-qr-preset="transferencia">Transferencia</button>
+                      <button type="button" class="wa-qr-preset-btn" data-qr-preset="compra">Compra cerrada</button>
+                    </div>
+                    <div class="wa-qr-composer-grid">
+                      <input id="waQuickReplyCodeInput" class="wa-settings-list-input" type="text" placeholder="Codigo (se autogenera)">
+                      <select id="waQuickReplySectionInput" class="wa-settings-list-input" aria-label="Seccion de respuesta"></select>
+                      <input id="waQuickReplyKeywordsInput" class="wa-settings-list-input" type="text" placeholder="Palabras clave (ej: envio, guia, paqueteria)">
+                      <button id="waQuickReplyAddBtn" class="wa-pill-btn" type="button">Agregar</button>
+                    </div>
+                    <textarea id="waQuickReplyInput" class="wa-qr-composer-text" placeholder="Escribe aqui la respuesta rapida..."></textarea>
+                    <input id="waQuickReplyImageInput" class="wa-settings-list-input" type="url" placeholder="URL de foto opcional para esta respuesta rapida (https://...)" aria-label="URL de foto opcional">
+                    <div class="wa-qr-composer-help">Tip: escribe el mensaje y el codigo se sugiere automaticamente. Usa <strong>Ctrl+Enter</strong> para agregar rapido.</div>
+                  </div>
+                  <div class="wa-settings-list-add">
+                    <input id="waQuickReplySectionNameInput" class="wa-settings-list-input" type="text" placeholder="Nueva seccion personalizada">
+                    <button id="waQuickReplySectionAddBtn" class="wa-pill-btn" type="button">Agregar seccion</button>
+                  </div>
+                  <div id="waQuickReplyTabButtons" class="wa-qr-tabs" role="tablist" aria-label="Tablas de respuestas rapidas">
+                    <button class="wa-qr-tab-btn active" type="button" data-qr-tab="sections" role="tab" aria-selected="true">Secciones</button>
+                    <button class="wa-qr-tab-btn" type="button" data-qr-tab="replies" role="tab" aria-selected="false">Respuestas</button>
+                    <button class="wa-qr-tab-btn" type="button" data-qr-tab="rules" role="tab" aria-selected="false">Automatizacion</button>
+                  </div>
+                  <div class="wa-qr-tab-pane active" data-qr-pane="sections" role="tabpanel">
+                    <div id="waQuickReplySectionsList" class="wa-settings-list-wrap"></div>
+                  </div>
+                  <div class="wa-qr-tab-pane" data-qr-pane="replies" role="tabpanel">
+                    <div id="waQuickReplyList" class="wa-settings-list-wrap"></div>
+                  </div>
+                  <div class="wa-qr-tab-pane" data-qr-pane="rules" role="tabpanel">
+                    <div class="wa-qr-rules-wrap">
+                      <div class="wa-settings-kicker">Automatizacion de fases</div>
+                      <div class="wa-qr-auto-head">
+                        <h3 style="margin:0;font-size:.9rem;">Clasificacion rapida por respuesta</h3>
+                        <div class="wa-qr-auto-actions">
+                          <button id="waQuickReplyRulesApplySmartBtn" class="wa-pill-btn" type="button" style="background:#0f766e">Autoconfigurar</button>
+                          <button id="waQuickReplyRulesClearBtn" class="wa-pill-btn" type="button" style="background:#94a3b8">Limpiar reglas</button>
+                        </div>
+                      </div>
+                      <p class="wa-settings-note" style="margin:0;">Activa una respuesta y elige a que <strong>Etapa</strong> debe mover automaticamente al lead cuando se envie. El <strong>Estatus</strong> se cambia manualmente.</p>
+                      <div class="wa-qr-auto-table-wrap">
+                        <table class="wa-qr-auto-table">
+                          <thead>
+                            <tr>
+                              <th>Auto</th>
+                              <th>ID</th>
+                              <th>Codigo</th>
+                              <th>Seccion</th>
+                              <th>Respuesta</th>
+                              <th>Etapa destino</th>
+                            </tr>
+                          </thead>
+                          <tbody id="waQuickReplyRulesList"></tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="wa-settings-actions">
+                  <button id="waQuickReplyResetBtn" class="wa-pill-btn" type="button" style="background:#94a3b8">Restaurar base</button>
+                </div>
+                <div id="waQuickReplyMessage" class="wa-settings-note"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <div id="waHistoryBackdrop" class="wa-history-backdrop" aria-hidden="true">
+    <div class="wa-history-modal" role="dialog" aria-modal="true" aria-labelledby="waHistoryTitle">
+      <div class="wa-history-head">
+        <h3 id="waHistoryTitle" class="wa-history-title">Historial del lead</h3>
+        <button id="waHistoryCloseBtn" class="wa-history-close" type="button">Cerrar</button>
+      </div>
+      <div id="waHistoryList" class="wa-history-list"></div>
+    </div>
+  </div>
+  <div id="waEventPopupBackdrop" class="wa-auth-backdrop" aria-hidden="true">
+    <div class="wa-auth-modal" role="dialog" aria-modal="true" aria-labelledby="waEventPopupTitle">
+      <h3 id="waEventPopupTitle" class="wa-auth-title">Agendar evento</h3>
+      <input id="waEventPopupTitleInput" class="wa-auth-input" type="text" maxlength="120" placeholder="Nombre del evento">
+      <input id="waEventPopupDateInput" class="wa-auth-input" type="date">
+      <input id="waEventPopupTimeInput" class="wa-auth-input" type="time" step="60">
+      <input id="waEventPopupNotesInput" class="wa-auth-input" type="text" maxlength="180" placeholder="Nota opcional">
+      <div id="waEventPopupError" class="wa-auth-error"></div>
+      <div class="wa-settings-actions">
+        <button id="waEventPopupCancelBtn" class="wa-pill-btn" type="button" style="background:#94a3b8">Cancelar</button>
+        <button id="waEventPopupSaveBtn" class="wa-pill-btn" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+  <div id="waScheduleMsgBackdrop" class="wa-auth-backdrop" aria-hidden="true">
+    <div class="wa-auth-modal" role="dialog" aria-modal="true" aria-labelledby="waScheduleMsgTitle">
+      <h3 id="waScheduleMsgTitle" class="wa-auth-title">Programar mensaje</h3>
+      <input id="waScheduleMsgContactInput" class="wa-auth-input" type="text" placeholder="Destinatario" readonly>
+      <div class="wa-auth-grid">
+        <select id="waScheduleMsgTypeSelect" class="wa-auth-select" aria-label="Tipo de mensaje">
+          <option value="Seguimiento">Seguimiento</option>
+          <option value="Cotizacion">Cotizacion</option>
+          <option value="Confirmacion">Confirmacion</option>
+          <option value="Pago">Pago</option>
+          <option value="Recordatorio">Recordatorio</option>
+        </select>
+        <input id="waScheduleMsgDateInput" class="wa-auth-input" type="date" aria-label="Fecha programada">
+      </div>
+      <input id="waScheduleMsgTimeInput" class="wa-auth-input" type="time" step="60" aria-label="Hora programada">
+      <textarea id="waScheduleMsgTextInput" class="wa-auth-textarea" maxlength="1200" placeholder="Escribe el mensaje que se enviara..."></textarea>
+      <input id="waScheduleMsgNoteInput" class="wa-auth-input" type="text" maxlength="200" placeholder="Nota interna (opcional)">
+      <label class="wa-auth-check"><input id="waScheduleMsgToComposerCheck" type="checkbox"> Cargar tambien el texto al compositor</label>
+      <div id="waScheduleMsgError" class="wa-auth-error"></div>
+      <div class="wa-settings-actions">
+        <button id="waScheduleMsgCancelBtn" class="wa-pill-btn" type="button" style="background:#94a3b8">Cancelar</button>
+        <button id="waScheduleMsgSaveBtn" class="wa-pill-btn" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+  <div id="waMsgDeleteBackdrop" class="wa-msg-delete-backdrop" aria-hidden="true">
+    <div class="wa-msg-delete-modal" role="dialog" aria-modal="true" aria-labelledby="waMsgDeleteTitle">
+      <h3 id="waMsgDeleteTitle" class="wa-msg-delete-title">Eliminar mensaje</h3>
+      <div id="waMsgDeleteText" class="wa-msg-delete-text">Selecciona como deseas eliminar este mensaje.</div>
+      <div class="wa-msg-delete-actions">
+        <button id="waMsgDeleteCancelBtn" class="wa-msg-delete-cancel" type="button">Cancelar</button>
+        <button id="waMsgDeleteMeBtn" class="wa-msg-delete-me" type="button">Eliminar para mi</button>
+        <button id="waMsgDeleteAllBtn" class="wa-msg-delete-all" type="button">Eliminar para todos</button>
+      </div>
+    </div>
+  </div>
+  <div id="waAuthBackdrop" class="wa-auth-backdrop" aria-hidden="true">
+    <div class="wa-auth-modal" role="dialog" aria-modal="true" aria-labelledby="waAuthTitle">
+      <h3 id="waAuthTitle" class="wa-auth-title">Iniciar sesion</h3>
+      <input id="waAuthEmail" class="wa-auth-input" type="email" placeholder="Correo">
+      <input id="waAuthPassword" class="wa-auth-input" type="password" placeholder="Contrasena">
+      <div id="waAuthError" class="wa-auth-error"></div>
+      <div class="wa-settings-actions">
+        <button id="waAuthLoginBtn" class="wa-pill-btn" type="button">Entrar</button>
+        <button id="waAuthLogoutBtn" class="wa-pill-btn" type="button" style="background:#94a3b8">Cerrar sesion</button>
+      </div>
+    </div>
+  </div>
+  <div id="waPermsBackdrop" class="wa-perms-backdrop" aria-hidden="true">
+    <div class="wa-perms-modal" role="dialog" aria-modal="true" aria-labelledby="waPermsTitle">
+      <h3 id="waPermsTitle" class="wa-perms-title">Permisos de modulos</h3>
+      <div id="waPermsGrid" class="wa-perms-grid"></div>
+      <div class="wa-settings-actions">
+        <button id="waPermsCancelBtn" class="wa-pill-btn" type="button" style="background:#94a3b8">Cancelar</button>
+        <button id="waPermsSaveBtn" class="wa-pill-btn" type="button">Guardar permisos</button>
+      </div>
+    </div>
+  </div>
+  <div id="waCatalogBackdrop" class="wa-perms-backdrop" aria-hidden="true">
+    <div class="wa-catalog-modal" role="dialog" aria-modal="true" aria-labelledby="waCatalogModalTitle">
+      <h3 id="waCatalogModalTitle" class="wa-auth-title">Agregar elemento</h3>
+      <div class="wa-settings-label" id="waCatalogModalTypeLabel">Tipo:</div>
+      <input id="waCatalogNameInput" class="wa-auth-input" type="text" placeholder="Nombre">
+      <div class="wa-settings-actions">
+        <button id="waCatalogCancelBtn" class="wa-pill-btn" type="button" style="background:#94a3b8">Cancelar</button>
+        <button id="waCatalogSaveBtn" class="wa-pill-btn" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+  <div id="waFunnelChatBackdrop" class="wa-funnel-chat-backdrop" aria-hidden="true">
+    <div class="wa-funnel-chat-modal" role="dialog" aria-modal="true" aria-labelledby="waFunnelChatTitle">
+      <div class="wa-funnel-chat-head">
+        <div class="wa-funnel-chat-head-main">
+          <div id="waFunnelChatAvatar" class="wa-funnel-chat-avatar">--</div>
+          <div style="min-width:0;">
+            <h3 id="waFunnelChatTitle" class="wa-funnel-chat-title">Chat</h3>
+            <div id="waFunnelChatSub" class="wa-funnel-chat-sub"></div>
+          </div>
+        </div>
+        <button id="waFunnelChatCloseBtn" class="wa-funnel-chat-close" type="button">Cerrar</button>
+      </div>
+      <div id="waFunnelChatConversation" class="wa-funnel-chat-conv"></div>
+      <div class="wa-funnel-chat-composer">
+        <input id="waFunnelChatInput" class="wa-funnel-chat-input" type="text" placeholder="Escribe un mensaje o /codigo">
+        <button id="waFunnelChatSendBtn" class="wa-pill-btn" type="button">Enviar</button>
+      </div>
+    </div>
+  </div>
+  <div id="waMediaBackdrop" class="wa-media-backdrop" aria-hidden="true">
+    <div class="wa-media-modal" id="waMediaModal" role="dialog" aria-modal="true" aria-labelledby="waMediaTitle">
+      <div class="wa-media-head">
+        <div>
+          <h3 id="waMediaTitle" class="wa-media-title">Contenido multimedia</h3>
+          <p class="wa-media-sub">Contenido multimedia de todos los chats</p>
+        </div>
+        <button id="waMediaCloseBtn" class="wa-media-close" type="button">Cerrar</button>
+      </div>
+      <div class="wa-media-toolbar">
+        <div class="wa-media-tabs" role="tablist" aria-label="Pestanas multimedia">
+          <button id="waMediaTabAssets" class="wa-media-tab active" data-media-tab="assets" type="button">Archivos multimedia</button>
+          <button id="waMediaTabDocs" class="wa-media-tab" data-media-tab="docs" type="button">Documentos</button>
+          <button id="waMediaTabLinks" class="wa-media-tab" data-media-tab="links" type="button">Enlaces</button>
+        </div>
+        <div class="wa-media-tools">
+          <button id="waMediaSearchToggle" class="wa-media-icon-btn" type="button" title="Buscar" aria-label="Buscar">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <input id="waMediaSearchInput" class="wa-media-search" type="search" placeholder="Buscar contenido...">
+          <button id="waMediaSortToggle" class="wa-media-icon-btn" type="button" title="Ordenar por" aria-label="Ordenar por">Ordenar por</button>
+          <button id="waMediaSelectToggle" class="wa-media-icon-btn" type="button" title="Seleccionar" aria-label="Seleccionar">Seleccionar</button>
+        </div>
+      </div>
+      <div id="waMediaFilters" class="wa-media-filters" aria-hidden="true">
+        <label class="lead-filter-label" for="waMediaSenderFilter">Enviado por:</label>
+        <select id="waMediaSenderFilter" class="wa-media-filter-select">
+          <option value="all">Todos</option>
+          <option value="me">Tu</option>
+          <option value="others">Otras personas</option>
+        </select>
+        <label class="lead-filter-label" for="waMediaOrderFilter">Ordenar por:</label>
+        <select id="waMediaOrderFilter" class="wa-media-filter-select">
+          <option value="desc">Mas recientes</option>
+          <option value="asc">Mas antiguos</option>
+        </select>
+      </div>
+      <div id="waMediaContent" class="wa-media-content"></div>
+      <div class="wa-media-batch-left">
+        <button id="waMediaBatchDelete" class="wa-media-danger" type="button" title="Eliminar" aria-label="Eliminar">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2m-8 0 1 12h8l1-12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="wa-media-batch-right">
+        <button id="waMediaBatchStar" class="wa-media-batch-btn" type="button" title="Destacar">Destacar</button>
+        <button id="waMediaBatchDownload" class="wa-media-batch-btn" type="button" title="Descargar">Descargar</button>
+        <button id="waMediaBatchForward" class="wa-media-batch-btn" type="button" title="Reenviar">Reenviar</button>
+      </div>
+    </div>
+  </div>
+  <div id="waChatOverlayBackdrop" class="wa-chat-overlay-backdrop" aria-hidden="true"></div>
+  <button id="waChatOverlayCloseBtn" class="wa-chat-overlay-close" type="button">Cerrar chat</button>
+  <script src="/config.js?v=LOCAL"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="/firebase.js?v=LOCAL"></script>
+  <input id="dirImportInput" type="file" accept=".csv,.txt" style="display:none">
+  <div id="dirModalBackdrop" class="dir-modal-backdrop" aria-hidden="true">
+    <div class="dir-modal" role="dialog" aria-modal="true" aria-labelledby="dirModalTitle">
+      <h3 id="dirModalTitle">Accion masiva</h3>
+      <div class="dir-modal-row" id="dirModalBody"></div>
+      <div class="dir-modal-actions">
+        <button id="dirModalCancelBtn" class="wa-pill-btn" style="background:#94a3b8">Cancelar</button>
+        <button id="dirModalConfirmBtn" class="wa-pill-btn">Aplicar</button>
+      </div>
+    </div>
+  </div>
+  <div id="leadSearchBackdrop" class="lead-popup-backdrop" aria-hidden="true">
+    <div class="lead-popup" role="dialog" aria-modal="true" aria-labelledby="leadPopupTitle">
+      <div class="lead-popup-left">
+        <div class="lead-popup-head">
+          <h3 id="leadPopupTitle" class="lead-popup-title">Buscar leads</h3>
+          <input id="leadPopupSearchInput" class="lead-popup-search" placeholder="Buscar por nombre o telefono">
+          <button id="leadPopupCloseBtn" class="lead-popup-close" type="button">Cerrar</button>
+        </div>
+        <div class="lead-popup-table-wrap">
+          <table class="lead-popup-table">
+            <thead>
+              <tr>
+                <th>Lead</th>
+                <th>Etapa</th>
+                <th>Etapa</th>
+                <th>Usuario</th>
+              </tr>
+            </thead>
+            <tbody id="leadPopupTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="lead-popup-right">
+        <h4 class="lead-filter-title">Filtros</h4>
+        <div class="lead-filter-group">
+          <div class="lead-filter-label">Estado de los leads</div>
+          <div class="lead-radio-list">
+            <label class="lead-radio-item"><input type="radio" name="leadStateFilter" value="all" checked> Todos</label>
+            <label class="lead-radio-item"><input type="radio" name="leadStateFilter" value="active"> Activos</label>
+            <label class="lead-radio-item"><input type="radio" name="leadStateFilter" value="archived"> Archivados</label>
+          </div>
+        </div>
+        <div class="lead-filter-group">
+          <label class="lead-filter-label" for="leadFilterDate">Fecha</label>
+          <input id="leadFilterDate" class="lead-filter-date" type="date">
+        </div>
+        <div class="lead-filter-group">
+          <label class="lead-filter-label" for="leadFilterStage">Etapa</label>
+          <select id="leadFilterStage" class="lead-filter-select">
+            <option value="">Todas</option>
+          </select>
+        </div>
+        <div class="lead-filter-group">
+          <label class="lead-filter-label" for="leadFilterStatus">Estatus</label>
+          <select id="leadFilterStatus" class="lead-filter-select">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="lead-filter-group">
+          <label class="lead-filter-label" for="leadFilterUser">Usuario</label>
+          <select id="leadFilterUser" class="lead-filter-select">
+            <option value="">Todos</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="waMassChatPreviewBackdrop" class="wa-mass-chat-preview-backdrop" aria-hidden="true">
+    <div class="wa-mass-chat-preview-modal" role="dialog" aria-modal="true" aria-labelledby="waMassChatPreviewTitle">
+      <div class="wa-mass-chat-preview-head">
+        <h3 id="waMassChatPreviewTitle" class="wa-mass-chat-preview-title">Vista previa</h3>
+        <button id="waMassChatPreviewClose" class="wa-mass-chat-preview-close" type="button">Cerrar</button>
+      </div>
+      <div id="waMassChatPreviewBody" class="wa-mass-chat-preview-body"></div>
+    </div>
+  </div>
+  <script>
+    (async function(){
+      try{
+        if(typeof window.initFirebaseApp === 'function'){
+          await window.initFirebaseApp();
+        }
+      }catch(_e){ console.warn('initFirebaseApp failed', _e); }
+    })();
+  </script>
+  <script src="chat.js?v=20260315zz"></script>
+</body>
+</html>
